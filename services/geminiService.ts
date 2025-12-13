@@ -206,36 +206,32 @@ export const generateSouvenirPhoto = async (
 
   const outfitDesc = getOutfitForVibe(vibe);
 
-  // 改進的 PROMPT: 更強調臉部一致性和參考圖片的使用
+  // 改進的 PROMPT: 明確指出圖片順序和對應關係
   const prompt = `
-    You MUST use the reference images provided to generate the faces. The FIRST reference image is Ailisha, the SECOND is the User.
+    IMPORTANT: You are given TWO reference images in this exact order:
+    1. FIRST image (Image #1): This is AILISHA - use this for the person on the RIGHT
+    2. SECOND image (Image #2): This is the USER - use this for the person on the LEFT
     
     Generate a realistic, high-quality wide-angle travel selfie photograph of two people standing together in front of the famous landmark "${landmarkName}" in ${cityName}.
     
-    CRITICAL REQUIREMENTS FOR PERSON 2 (Ailisha, on the RIGHT):
-    - The FIRST reference image shows Ailisha's EXACT face, features, and appearance.
-    - Person 2 MUST have IDENTICAL facial features to the person in the FIRST reference image:
-      * IDENTICAL face shape and structure
-      * IDENTICAL eyes (shape, color, expression)
-      * IDENTICAL nose
-      * IDENTICAL mouth and smile
-      * IDENTICAL hair (style, color, length)
-      * IDENTICAL skin tone
-      * IDENTICAL overall facial appearance
-    - DO NOT create a generic or different face. The face MUST be an EXACT COPY of the FIRST reference image (Ailisha).
-    - Outfit: ${outfitDesc} (clothing can change, but face must remain IDENTICAL to first reference)
-    - Pose: Standing close to Person 1, looking energetic and friendly, maybe making a peace sign or pointing at the landmark
+    === PERSON ON THE RIGHT (Use Image #1 - AILISHA) ===
+    CRITICAL: This person MUST look EXACTLY like the person in Image #1 (Ailisha).
+    - Face: Copy Image #1's face EXACTLY - same face shape, eyes, nose, mouth, hair, skin tone
+    - DO NOT create a different face. It MUST be an exact replica of Image #1's face.
+    - Outfit: ${outfitDesc} (clothing can change, but face must be IDENTICAL to Image #1)
+    - Pose: Standing close to the person on the left, looking energetic and friendly, maybe making a peace sign or pointing at the landmark
+    - Position: On the RIGHT side of the photo
     
-    CRITICAL REQUIREMENTS FOR PERSON 1 (User, on the LEFT):
-    - The SECOND reference image shows the User's exact face, features, and appearance.
-    - Person 1 MUST match the facial features, hair, and gender of the person in the SECOND reference image (User).
-    - They are smiling at the camera.
+    === PERSON ON THE LEFT (Use Image #2 - USER) ===
+    - Face: Match the person in Image #2 (User) - same facial features, hair, and gender
+    - They are smiling at the camera
+    - Position: On the LEFT side of the photo
     
     Background: Clearly visible ${landmarkName}, ${landmarkDesc}. The landmark should be recognizable and prominent.
     
     Style: Professional travel photography, vibrant colors, influencer selfie style, 4k resolution, natural lighting.
     
-    MOST IMPORTANT: Person 2's (Ailisha's) face must be pixel-perfect identical to the FIRST reference image. Copy Ailisha's face from the first reference image exactly. This is the absolute top priority.
+    ABSOLUTE PRIORITY: The person on the RIGHT must have a face that is pixel-perfect identical to Image #1 (Ailisha). This is the most critical requirement.
   `;
 
   try {
@@ -247,26 +243,26 @@ export const generateSouvenirPhoto = async (
     console.log('使用模型:', model);
     
     // Gemini API 調用：將兩個參考圖片和 prompt 一起傳遞
-    // 注意：parts 數組的順序很重要
+    // 圖片順序：Image #1 = Ailisha (右邊的人), Image #2 = User (左邊的人)
     const response = await ai.models.generateContent({
       model,
       contents: {
         parts: [
-          // 第一個圖片：Ailisha 參考圖（必須放在前面，讓模型先學習她的臉部特徵）
+          // Image #1: Ailisha 參考圖（右邊的人）
           { 
             inlineData: { 
               mimeType: "image/jpeg", 
               data: cleanAilisha 
             } 
           },
-          // 第二個圖片：用戶自拍
+          // Image #2: 用戶自拍（左邊的人）
           { 
             inlineData: { 
               mimeType: "image/jpeg", 
               data: cleanUser 
             } 
           },
-          // Prompt 說明
+          // Prompt 說明（明確指出 Image #1 = Ailisha, Image #2 = User）
           { 
             text: prompt 
           }
@@ -281,9 +277,25 @@ export const generateSouvenirPhoto = async (
     }) as unknown as GeminiImageResponse;
 
     // Check for image in response
-    const parts = response.candidates?.[0]?.content?.parts || [];
+    const candidates = response.candidates || [];
+    if (candidates.length === 0) {
+      console.error('API 響應中沒有 candidates');
+      throw new Error('API 沒有返回任何結果');
+    }
+
+    const candidate = candidates[0];
+    const parts = candidate?.content?.parts || [];
+    
+    // 檢查是否有錯誤
+    if (candidate.finishReason && candidate.finishReason !== 'STOP') {
+      console.error('API 響應 finishReason:', candidate.finishReason);
+      throw new Error(`圖片生成被中斷: ${candidate.finishReason}`);
+    }
+
+    // 查找圖片數據
     for (const part of parts) {
-      if (part.inlineData) {
+      if (part.inlineData && part.inlineData.data) {
+        console.log('成功生成圖片，大小:', part.inlineData.data.length, 'bytes');
         return {
           photoUrl: `data:image/png;base64,${part.inlineData.data}`,
           prompt: prompt.trim()
@@ -291,15 +303,18 @@ export const generateSouvenirPhoto = async (
       }
     }
     
-    // 如果沒有找到圖片，檢查是否有錯誤訊息
-    const errorMessage = response.candidates?.[0]?.finishReason || 'Unknown error';
-    console.error('API 響應中沒有圖片，finishReason:', errorMessage);
-    throw new Error(`無法生成圖片: ${errorMessage}`);
+    // 如果沒有找到圖片
+    console.error('API 響應中沒有圖片數據');
+    console.error('Response structure:', JSON.stringify(response, null, 2));
+    throw new Error('API 響應中沒有找到圖片數據');
   } catch (error: any) {
     console.error("Image generation failed:", error);
     // 提供更詳細的錯誤訊息
     if (error?.message) {
       throw new Error(`生成景點合照失敗: ${error.message}`);
+    }
+    if (error?.error?.message) {
+      throw new Error(`生成景點合照失敗: ${error.error.message}`);
     }
     throw new Error('生成景點合照時發生未知錯誤，請稍後再試');
   }
