@@ -365,7 +365,7 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 font-sans">
+      <div className="min-h-screen bg-white font-sans">
         <BackgroundMusic gameState={gameState.gameState} />
         <ToastContainer toasts={toasts} onRemove={removeToast} />
         
