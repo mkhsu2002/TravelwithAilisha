@@ -16,18 +16,18 @@ export const LandmarkSelectionScreen: React.FC<LandmarkSelectionScreenProps> = (
 }) => {
   return (
     <div className="pb-32 max-w-lg mx-auto">
-      {/* 城市照片主視覺 (9:19 比例) */}
+      {/* 城市照片主視覺 (9:16 比例) */}
       {cityPhotoUrl ? (
         <div className="w-full mb-6">
           <img
             src={cityPhotoUrl}
             alt="Ailisha 在城市中"
             className="w-full object-cover"
-            style={{ aspectRatio: '9/19' }}
+            style={{ aspectRatio: '9/16' }}
           />
         </div>
       ) : (
-        <div className="w-full mb-6 bg-gray-200 flex items-center justify-center" style={{ aspectRatio: '9/19' }}>
+        <div className="w-full mb-6 bg-gray-200 flex items-center justify-center" style={{ aspectRatio: '9/16' }}>
           <p className="text-gray-500">照片生成中...</p>
         </div>
       )}

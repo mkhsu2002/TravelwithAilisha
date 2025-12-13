@@ -55,7 +55,7 @@ const getOutfitForVibe = (vibe: CityVibe): string => {
 };
 
 /**
- * Generates a city photo of Ailisha exploring the city (9:19 aspect ratio)
+ * Generates a city photo of Ailisha exploring the city (9:16 aspect ratio)
  */
 export const generateCityPhoto = async (
   cityName: string,
@@ -86,7 +86,7 @@ export const generateCityPhoto = async (
 
   // 生成 Ailisha 在城市中自在愜意觀光的照片
   const prompt = `
-    Generate a realistic, high-quality vertical travel photo (9:19 aspect ratio) of Ailisha exploring and enjoying ${cityName}.
+    Generate a realistic, high-quality vertical travel photo (9:16 aspect ratio) of Ailisha exploring and enjoying ${cityName}.
     
     CRITICAL REQUIREMENTS FOR AILISHA:
     - The reference image shows Ailisha's exact face, features, and appearance.
@@ -110,7 +110,7 @@ export const generateCityPhoto = async (
     
     Background: Clearly show ${cityName} - ${cityDescription}. The city should be recognizable with its characteristic features, architecture, and atmosphere. Include elements that represent the city's vibe: ${vibe}.
     
-    Style: Professional travel photography, vibrant colors, natural lighting, Instagram-worthy composition, 4k resolution, vertical format (9:19 aspect ratio).
+    Style: Professional travel photography, vibrant colors, natural lighting, Instagram-worthy composition, 4k resolution, vertical format (9:16 aspect ratio).
     
     IMPORTANT: Ailisha's face must be pixel-perfect identical to the reference image. This is the most critical requirement. The photo should capture the feeling of exploring and enjoying the city.
   `;
@@ -142,7 +142,7 @@ export const generateCityPhoto = async (
       },
       config: {
         imageConfig: {
-            aspectRatio: "9:19",
+            aspectRatio: "9:16",
             imageSize: "1K"
         }
       }

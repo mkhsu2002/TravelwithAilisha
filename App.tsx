@@ -228,7 +228,7 @@ const App: React.FC = () => {
             <div class="landmark">📍 ${item.landmark.name}</div>
             <div style="width: 100%; margin-bottom: 15px;">
               <h4 style="font-size: 14px; color: #999; margin-bottom: 8px; text-align: center;">城市照片</h4>
-              <img src="${item.cityPhotoUrl}" class="photo" alt="Ailisha 在 ${item.city.name}" style="aspect-ratio: 9/19; object-fit: cover; margin-bottom: 15px;" />
+              <img src="${item.cityPhotoUrl}" class="photo" alt="Ailisha 在 ${item.city.name}" style="aspect-ratio: 9/16; object-fit: cover; margin-bottom: 15px;" />
             </div>
             ${item.landmarkPhotoUrl ? `
             <div style="width: 100%; margin-bottom: 15px;">

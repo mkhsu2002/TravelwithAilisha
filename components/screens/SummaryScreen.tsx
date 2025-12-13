@@ -36,7 +36,7 @@ export const SummaryScreen: React.FC<SummaryScreenProps> = ({
             
             <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl shadow-lg border border-gray-50 hover:-translate-y-1 transition-transform duration-300">
               {/* 城市照片 */}
-              <div className="mb-3 rounded-xl overflow-hidden shadow-inner" style={{ aspectRatio: '9/19' }}>
+              <div className="mb-3 rounded-xl overflow-hidden shadow-inner" style={{ aspectRatio: '9/16' }}>
                 <img
                   src={item.cityPhotoUrl}
                   alt={`Ailisha 在 ${item.city.name}`}

@@ -29,7 +29,7 @@ export interface TravelHistoryItem {
   round: number;
   city: City;
   landmark: Landmark;
-  cityPhotoUrl: string; // Ailisha 在城市中的照片（9:19 比例）
+  cityPhotoUrl: string; // Ailisha 在城市中的照片（9:16 比例）
   landmarkPhotoUrl: string; // 玩家與 Ailisha 在景點的合照
   diaryEntry: string;
   date: string; // 格式：YYYY/MM/DD
