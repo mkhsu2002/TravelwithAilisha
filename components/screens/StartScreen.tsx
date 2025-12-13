@@ -47,18 +47,18 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[85vh] p-6 max-w-md mx-auto space-y-8 animate-fade-in">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-extrabold text-gray-800 tracking-tight">
+    <div className="flex flex-col items-center justify-center min-h-[85vh] py-6 px-4 sm:px-6 max-w-md mx-auto space-y-6 sm:space-y-8 animate-fade-in">
+      <div className="text-center space-y-3 sm:space-y-4">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">
           與 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">Ailisha</span><br/>一起環遊世界
         </h1>
-        <p className="text-gray-600 leading-relaxed">
+        <p className="text-sm sm:text-base text-gray-600 leading-relaxed px-2">
           嗨！我是 Ailisha 艾莉莎。<br/>
           上傳一張自拍，我們馬上從 <b className="text-gray-800">台北 101</b> 出發！ 🌍 ✨
         </p>
       </div>
 
-      <div className="w-full space-y-5 bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+      <div className="w-full space-y-4 sm:space-y-5 bg-white p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100">
         <div>
           <label htmlFor="nickname" className="block text-sm font-bold text-gray-700 mb-2">
             您的暱稱
@@ -91,7 +91,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         <Button
           disabled={!userData.nickname || !userData.selfieBase64}
           onClick={handleStart}
-          className="text-lg py-4 shadow-pink-500/20"
+          className="text-base sm:text-lg py-3 sm:py-4 shadow-pink-500/20"
           aria-label="開始旅程"
         >
           出發去旅行！ ✈️

@@ -349,7 +349,7 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50 pb-10 font-sans">
+      <div className="min-h-screen bg-gray-50 font-sans">
         <BackgroundMusic gameState={gameState.gameState} />
         <ToastContainer toasts={toasts} onRemove={removeToast} />
         
@@ -360,7 +360,7 @@ const App: React.FC = () => {
           />
         )}
         
-        <main className="container mx-auto">
+        <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12">
           {renderContent()}
         </main>
       </div>

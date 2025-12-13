@@ -20,14 +20,14 @@ const LandmarkSelectionScreenComponent: React.FC<LandmarkSelectionScreenProps> =
   const [promptModalOpen, setPromptModalOpen] = useState(false);
 
   return (
-    <div className="pb-32 max-w-lg mx-auto">
+    <div className="px-4 sm:px-6 pb-24 sm:pb-32 max-w-lg mx-auto">
       {/* 城市照片主視覺 (9:16 比例) */}
       {cityPhotoUrl ? (
-        <div className="w-full mb-6 relative group">
+        <div className="w-full mb-4 sm:mb-6 relative group rounded-xl sm:rounded-2xl overflow-hidden shadow-lg">
           <img
             src={cityPhotoUrl}
             alt="Ailisha 在城市中"
-            className="w-full object-cover"
+            className="w-full h-auto object-cover"
             style={{ aspectRatio: '9/16' }}
             loading="lazy"
             decoding="async"
@@ -46,30 +46,30 @@ const LandmarkSelectionScreenComponent: React.FC<LandmarkSelectionScreenProps> =
           )}
         </div>
       ) : (
-        <div className="w-full mb-6 bg-gray-200 flex items-center justify-center" style={{ aspectRatio: '9/16' }}>
-          <p className="text-gray-500">照片生成中...</p>
+        <div className="w-full mb-4 sm:mb-6 bg-gray-200 flex items-center justify-center rounded-xl sm:rounded-2xl" style={{ aspectRatio: '9/16' }}>
+          <p className="text-gray-500 text-sm sm:text-base">照片生成中...</p>
         </div>
       )}
 
       {/* 城市介紹 */}
-      <div className="px-6 mb-6">
-        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-          <p className="text-gray-800 leading-relaxed text-center">{cityIntro}</p>
+      <div className="mb-4 sm:mb-6">
+        <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100">
+          <p className="text-sm sm:text-base text-gray-800 leading-relaxed text-center">{cityIntro}</p>
         </div>
       </div>
 
       {/* 景點選項 */}
-      <div className="px-6">
-        <p className="text-center text-sm font-bold text-gray-500 mb-4">
+      <div>
+        <p className="text-center text-xs sm:text-sm font-bold text-gray-500 mb-3 sm:mb-4 px-2">
           ✨ 我挑了三個最棒的景點，選一個吧！ ✨
         </p>
         
-        <div className="grid grid-cols-1 gap-4" role="list">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4" role="list">
           {landmarkOptions.map((landmark, idx) => (
             <button
               key={`${landmark.name}-${idx}`}
               onClick={() => onLandmarkSelect(landmark)}
-              className="bg-white rounded-2xl p-5 shadow-md hover:shadow-xl transition-all cursor-pointer border border-transparent hover:border-pink-300 text-left group"
+              className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-md hover:shadow-xl transition-all cursor-pointer border border-transparent hover:border-pink-300 text-left group w-full"
               role="listitem"
               tabIndex={0}
               onKeyDown={(e) => {
@@ -80,10 +80,10 @@ const LandmarkSelectionScreenComponent: React.FC<LandmarkSelectionScreenProps> =
               }}
               aria-label={`選擇 ${landmark.name}`}
             >
-              <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-pink-600 transition-colors">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 group-hover:text-pink-600 transition-colors">
                 {landmark.name}
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-3">
+              <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-3">
                 {landmark.description}
               </p>
               <div className="flex justify-end">
