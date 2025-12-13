@@ -1,4 +1,6 @@
-import { MAX_FILE_SIZE, ALLOWED_IMAGE_TYPES, ERROR_MESSAGES } from './constants';
+import { GAME_CONFIG, ALLOWED_IMAGE_TYPES, ERROR_MESSAGES } from './constants';
+
+const MAX_FILE_SIZE = GAME_CONFIG.MAX_FILE_SIZE;
 
 /**
  * 壓縮圖片
