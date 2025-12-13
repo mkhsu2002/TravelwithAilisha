@@ -55,6 +55,114 @@ const getOutfitForVibe = (vibe: CityVibe): string => {
 };
 
 /**
+ * Generates a city photo of Ailisha exploring the city (9:19 aspect ratio)
+ */
+export const generateCityPhoto = async (
+  cityName: string,
+  cityDescription: string,
+  vibe: CityVibe,
+  apiKey: string
+): Promise<string> => {
+  // 確保 AI 客戶端已初始化
+  initializeAI(apiKey);
+  const model = "gemini-3-pro-image-preview";
+
+  // 載入 Ailisha 參考圖片
+  const ailishaImageBase64 = await loadAilishaImage();
+  
+  if (!ailishaImageBase64) {
+    throw new Error('無法載入 Ailisha 參考圖片');
+  }
+  
+  const cleanAilisha = ailishaImageBase64.includes(',')
+    ? ailishaImageBase64.split(',')[1]
+    : ailishaImageBase64;
+
+  // 調試：確認圖片已載入
+  console.log('Ailisha 參考圖片已載入，大小:', cleanAilisha.length, 'bytes');
+  console.log('生成城市照片:', cityName, '風格:', vibe);
+
+  const outfitDesc = getOutfitForVibe(vibe);
+
+  // 生成 Ailisha 在城市中自在愜意觀光的照片
+  const prompt = `
+    Generate a realistic, high-quality vertical travel photo (9:19 aspect ratio) of Ailisha exploring and enjoying ${cityName}.
+    
+    CRITICAL REQUIREMENTS FOR AILISHA:
+    - The reference image shows Ailisha's exact face, features, and appearance.
+    - Ailisha MUST have IDENTICAL facial features to the person in the reference image:
+      * Same face shape and structure
+      * Same eyes (shape, color, expression)
+      * Same nose
+      * Same mouth and smile
+      * Same hair (style, color, length)
+      * Same skin tone
+      * Same overall facial appearance
+    - DO NOT create a generic face. The face MUST be an exact match to the reference image.
+    - Outfit: ${outfitDesc} (clothing can change, but face must remain identical)
+    - Pose: Ailisha is exploring the city naturally, looking relaxed and happy. She might be:
+      * Walking through a street market
+      * Standing at a viewpoint overlooking the city
+      * Sitting at a cafe
+      * Taking photos with her phone
+      * Looking at interesting architecture or scenery
+    - Expression: Natural, happy, relaxed, enjoying the moment
+    
+    Background: Clearly show ${cityName} - ${cityDescription}. The city should be recognizable with its characteristic features, architecture, and atmosphere. Include elements that represent the city's vibe: ${vibe}.
+    
+    Style: Professional travel photography, vibrant colors, natural lighting, Instagram-worthy composition, 4k resolution, vertical format (9:19 aspect ratio).
+    
+    IMPORTANT: Ailisha's face must be pixel-perfect identical to the reference image. This is the most critical requirement. The photo should capture the feeling of exploring and enjoying the city.
+  `;
+
+  try {
+    const ai = getAI();
+    
+    // 調試：確認圖片數據
+    console.log('Ailisha 參考圖片大小:', cleanAilisha.length, 'bytes');
+    console.log('使用模型:', model);
+    
+    // Gemini API 調用：傳遞 Ailisha 參考圖和 prompt
+    const response = await ai.models.generateContent({
+      model,
+      contents: {
+        parts: [
+          // Ailisha 參考圖
+          { 
+            inlineData: { 
+              mimeType: "image/jpeg", 
+              data: cleanAilisha 
+            } 
+          },
+          // Prompt 說明
+          { 
+            text: prompt 
+          }
+        ]
+      },
+      config: {
+        imageConfig: {
+            aspectRatio: "9:19",
+            imageSize: "1K"
+        }
+      }
+    }) as unknown as GeminiImageResponse;
+
+    // Check for image in response
+    const parts = response.candidates?.[0]?.content?.parts || [];
+    for (const part of parts) {
+      if (part.inlineData) {
+        return `data:image/png;base64,${part.inlineData.data}`;
+      }
+    }
+    throw new Error("No image generated");
+  } catch (error) {
+    console.error("City photo generation failed:", error);
+    throw error;
+  }
+};
+
+/**
  * Generates the souvenir photo using gemini-3-pro-image-preview
  */
 export const generateSouvenirPhoto = async (
@@ -76,38 +184,79 @@ export const generateSouvenirPhoto = async (
 
   // 載入 Ailisha 參考圖片
   const ailishaImageBase64 = await loadAilishaImage();
+  
+  if (!ailishaImageBase64) {
+    throw new Error('無法載入 Ailisha 參考圖片');
+  }
+  
   const cleanAilisha = ailishaImageBase64.includes(',')
     ? ailishaImageBase64.split(',')[1]
     : ailishaImageBase64;
 
+  // 調試：確認圖片已載入
+  console.log('Ailisha 參考圖片已載入，大小:', cleanAilisha.length, 'bytes');
+
   const outfitDesc = getOutfitForVibe(vibe);
 
-  // UPDATED PROMPT: 
-  // 1. Use Ailisha reference image for face consistency.
-  // 2. Dynamic outfit based on location vibe.
+  // 改進的 PROMPT: 更強調臉部一致性和參考圖片的使用
   const prompt = `
-    Generate a realistic, high-quality wide-angle travel selfie of two people standing in front of the famous ${landmarkName} in ${cityName}.
+    You are generating a realistic, high-quality wide-angle travel selfie photograph of two people standing together in front of the famous landmark "${landmarkName}" in ${cityName}.
+    
+    CRITICAL REQUIREMENTS FOR PERSON 2 (Ailisha, on the RIGHT):
+    - The second reference image shows Ailisha's exact face, features, and appearance.
+    - Person 2 MUST have IDENTICAL facial features to the person in the second reference image:
+      * Same face shape and structure
+      * Same eyes (shape, color, expression)
+      * Same nose
+      * Same mouth and smile
+      * Same hair (style, color, length)
+      * Same skin tone
+      * Same overall facial appearance
+    - DO NOT create a generic face. The face MUST be an exact match to the reference image.
+    - Outfit: ${outfitDesc} (clothing can change, but face must remain identical)
+    - Pose: Standing close to Person 1, looking energetic and friendly, maybe making a peace sign or pointing at the landmark
     
     Person 1 (Left): Matches the facial features, hair, and gender of the person in the first reference image (User). They are smiling at the camera.
     
-    Person 2 (Right): This is Ailisha. 
-    **Face**: She MUST match the facial features, appearance, and look exactly like the person in the second reference image. Maintain complete facial consistency with the reference photo.
-    **Outfit**: She is wearing ${outfitDesc}.
-    **Pose**: She is standing close to Person 1, looking energetic and friendly, maybe making a peace sign or pointing at the landmark.
+    Background: Clearly visible ${landmarkName}, ${landmarkDesc}. The landmark should be recognizable and prominent.
     
-    Background: Clearly visible ${landmarkName}, ${landmarkDesc}. 
-    Style: Professional travel photography, vibrant colors, influencer selfie style, 4k resolution.
+    Style: Professional travel photography, vibrant colors, influencer selfie style, 4k resolution, natural lighting.
+    
+    IMPORTANT: Person 2's face must be pixel-perfect identical to the second reference image. This is the most critical requirement.
   `;
 
   try {
     const ai = getAI();
+    
+    // 調試：確認圖片數據
+    console.log('用戶圖片大小:', cleanUser.length, 'bytes');
+    console.log('Ailisha 參考圖片大小:', cleanAilisha.length, 'bytes');
+    console.log('使用模型:', model);
+    
+    // Gemini API 調用：將兩個參考圖片和 prompt 一起傳遞
+    // 注意：parts 數組的順序很重要
     const response = await ai.models.generateContent({
       model,
       contents: {
         parts: [
-          { inlineData: { mimeType: "image/jpeg", data: cleanUser } },
-          { inlineData: { mimeType: "image/jpeg", data: cleanAilisha } },
-          { text: prompt }
+          // 第一個圖片：Ailisha 參考圖（必須放在前面，讓模型先學習她的臉部特徵）
+          { 
+            inlineData: { 
+              mimeType: "image/jpeg", 
+              data: cleanAilisha 
+            } 
+          },
+          // 第二個圖片：用戶自拍
+          { 
+            inlineData: { 
+              mimeType: "image/jpeg", 
+              data: cleanUser 
+            } 
+          },
+          // Prompt 說明
+          { 
+            text: prompt 
+          }
         ]
       },
       config: {

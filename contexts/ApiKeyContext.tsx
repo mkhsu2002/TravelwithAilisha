@@ -14,18 +14,13 @@ const STORAGE_KEY = 'gemini_api_key';
 export const ApiKeyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [apiKey, setApiKeyState] = useState<string | null>(null);
 
-  // 載入儲存的 API Key
+  // 僅從環境變數讀取 API Key（避免暴露）
   useEffect(() => {
-    const storedKey = localStorage.getItem(STORAGE_KEY);
-    if (storedKey) {
-      setApiKeyState(storedKey);
+    const envKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (envKey) {
+      setApiKeyState(envKey);
     } else {
-      // 如果沒有儲存的 Key，嘗試從環境變數讀取
-      const envKey = import.meta.env.VITE_GEMINI_API_KEY;
-      if (envKey) {
-        setApiKeyState(envKey);
-        localStorage.setItem(STORAGE_KEY, envKey);
-      }
+      console.warn('VITE_GEMINI_API_KEY 未設定，請在環境變數中配置');
     }
   }, []);
 

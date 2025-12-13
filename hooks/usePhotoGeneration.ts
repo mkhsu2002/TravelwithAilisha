@@ -1,45 +1,41 @@
 import { useCallback } from 'react';
 import { City, Landmark, TravelHistoryItem } from '../types';
-import { generateSouvenirPhoto, generateDiaryEntry } from '../services/geminiService';
+import { generateCityPhoto, generateDiaryEntry } from '../services/geminiService';
 import { useApiKey } from '../contexts/ApiKeyContext';
 import { calculateTravelDate } from '../utils/dateUtils';
 
 interface UsePhotoGenerationParams {
-  userSelfieBase64: string | null;
   currentRound: number;
   onSuccess: (entry: TravelHistoryItem) => void;
   onLoadingChange: (isLoading: boolean, message: string) => void;
 }
 
 export const usePhotoGeneration = ({
-  userSelfieBase64,
   currentRound,
   onSuccess,
   onLoadingChange,
 }: UsePhotoGenerationParams) => {
   const { apiKey } = useApiKey();
 
-  const generatePhoto = useCallback(async (
+  const generateCityPhotoForCity = useCallback(async (
     city: City,
     landmark: Landmark
   ): Promise<TravelHistoryItem> => {
-    if (!userSelfieBase64 || !city) {
+    if (!city) {
       throw new Error('缺少必要的資料');
     }
 
     if (!apiKey) {
-      throw new Error('請先配置 API Key。請在右上角點擊「設定 API Key」。');
+      throw new Error('API Key 未設定');
     }
 
-    onLoadingChange(true, `正在 ${landmark.name} 架設相機準備自拍... 📸`);
+    onLoadingChange(true, `正在生成 ${city.name} 的城市照片... 📸`);
 
     try {
-      // 1. 生成照片
-      const photoUrl = await generateSouvenirPhoto(
-        userSelfieBase64,
+      // 1. 生成城市照片（Ailisha 在城市中）
+      const cityPhotoUrl = await generateCityPhoto(
         city.name,
-        landmark.name,
-        landmark.description,
+        city.description,
         city.vibe,
         apiKey
       );
@@ -55,7 +51,7 @@ export const usePhotoGeneration = ({
         round: currentRound,
         city,
         landmark,
-        photoUrl,
+        cityPhotoUrl,
         diaryEntry: diary,
         date: dateString,
       };
@@ -63,15 +59,15 @@ export const usePhotoGeneration = ({
       onSuccess(newEntry);
       return newEntry;
     } catch (error) {
-      console.error('生成照片失敗:', error);
+      console.error('生成城市照片失敗:', error);
       throw error;
     } finally {
       onLoadingChange(false, '');
     }
-  }, [userSelfieBase64, currentRound, apiKey, onSuccess, onLoadingChange]);
+  }, [currentRound, apiKey, onSuccess, onLoadingChange]);
 
   return {
-    generatePhoto,
+    generateCityPhoto: generateCityPhotoForCity,
   };
 };
 

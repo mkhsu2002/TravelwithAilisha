@@ -22,6 +22,7 @@ export const useGameState = () => {
   const [selectedLandmark, setSelectedLandmark] = useState<Landmark | null>(null);
   const [cityIntro, setCityIntro] = useState<string>('');
   const [generatedPhoto, setGeneratedPhoto] = useState<string | null>(null);
+  const [cityPhotoUrl, setCityPhotoUrl] = useState<string | null>(null);
   
   const [loadingState, setLoadingState] = useState<LoadingState>({
     isLoading: false,
@@ -34,6 +35,15 @@ export const useGameState = () => {
 
   const addHistoryItem = useCallback((item: TravelHistoryItem) => {
     setHistory(prev => [...prev, item]);
+  }, []);
+
+  const updateLastHistoryItem = useCallback((updates: Partial<TravelHistoryItem>) => {
+    setHistory(prev => {
+      if (prev.length === 0) return prev;
+      const updated = [...prev];
+      updated[updated.length - 1] = { ...updated[updated.length - 1], ...updates };
+      return updated;
+    });
   }, []);
 
   const nextRound = useCallback(() => {
@@ -61,6 +71,7 @@ export const useGameState = () => {
     setSelectedLandmark(null);
     setCityIntro('');
     setGeneratedPhoto(null);
+    setCityPhotoUrl(null);
     setLoadingState({ isLoading: false, message: '' });
   }, []);
 
@@ -93,11 +104,14 @@ export const useGameState = () => {
     setCityIntro,
     generatedPhoto,
     setGeneratedPhoto,
+    cityPhotoUrl,
+    setCityPhotoUrl,
     loadingState,
     
     // Actions
     setLoading,
     addHistoryItem,
+    updateLastHistoryItem,
     nextRound,
     resetGame,
     isGameComplete,

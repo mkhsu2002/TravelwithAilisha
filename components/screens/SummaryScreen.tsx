@@ -35,10 +35,10 @@ export const SummaryScreen: React.FC<SummaryScreenProps> = ({
             </div>
             
             <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl shadow-lg border border-gray-50 hover:-translate-y-1 transition-transform duration-300">
-              <div className="mb-4 rounded-xl overflow-hidden h-48 shadow-inner">
+              <div className="mb-4 rounded-xl overflow-hidden shadow-inner" style={{ aspectRatio: '9/19' }}>
                 <img
-                  src={item.photoUrl}
-                  alt={`${item.city.name} ${item.landmark.name}`}
+                  src={item.cityPhotoUrl}
+                  alt={`Ailisha 在 ${item.city.name}`}
                   className="w-full h-full object-cover"
                 />
               </div>

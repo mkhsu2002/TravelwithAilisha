@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { UserData } from '../../types';
 import { Button } from '../Button';
 import { PhotoUpload } from '../PhotoUpload';
 import { compressImage, validateImageFile } from '../../utils/imageUtils';
-import { useApiKey } from '../../contexts/ApiKeyContext';
-import { ApiKeyModal } from '../ApiKeyModal';
 
 interface StartScreenProps {
   userData: UserData;
@@ -19,19 +17,12 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   onStart,
   onError,
 }) => {
-  const { isConfigured } = useApiKey();
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
 
   const handleImageSelected = async (base64: string) => {
     onUserDataChange({ ...userData, selfieBase64: base64 });
   };
 
   const handleStart = () => {
-    if (!isConfigured) {
-      setIsApiKeyModalOpen(true);
-      onError?.('請先配置 API Key 才能開始旅程');
-      return;
-    }
     onStart();
   };
 
@@ -95,32 +86,8 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           </div>
         )}
 
-        {!isConfigured && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
-            <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-yellow-800 mb-1">
-                  需要配置 API Key
-                </p>
-                <p className="text-xs text-yellow-700 mb-2">
-                  請先設定 Gemini API Key 才能開始旅程
-                </p>
-                <button
-                  onClick={() => setIsApiKeyModalOpen(true)}
-                  className="text-xs text-yellow-800 underline hover:text-yellow-900 font-medium"
-                >
-                  點擊設定 API Key
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
         <Button
-          disabled={!userData.nickname || !userData.selfieBase64 || !isConfigured}
+          disabled={!userData.nickname || !userData.selfieBase64}
           onClick={handleStart}
           className="text-lg py-4 shadow-pink-500/20"
           aria-label="開始旅程"
@@ -128,11 +95,6 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           出發去旅行！ ✈️
         </Button>
       </div>
-
-      <ApiKeyModal
-        isOpen={isApiKeyModalOpen}
-        onClose={() => setIsApiKeyModalOpen(false)}
-      />
     </div>
   );
 };

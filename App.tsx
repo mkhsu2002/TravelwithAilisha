@@ -13,7 +13,6 @@ import { StartScreen } from './components/screens/StartScreen';
 import { IntroScreen } from './components/screens/IntroScreen';
 import { CitySelectionScreen } from './components/screens/CitySelectionScreen';
 import { LandmarkSelectionScreen } from './components/screens/LandmarkSelectionScreen';
-import { PhotoResultScreen } from './components/screens/PhotoResultScreen';
 import { SummaryScreen } from './components/screens/SummaryScreen';
 import { saveHistory, saveGameProgress, loadUserData, loadHistory, loadGameProgress } from './utils/storage';
 import { GAME_CONFIG } from './utils/constants';
@@ -85,14 +84,12 @@ const App: React.FC = () => {
 
   // Photo Generation Hook
   const photoGeneration = usePhotoGeneration({
-    userSelfieBase64: gameState.userData.selfieBase64,
     currentRound: gameState.currentRound,
     onSuccess: (entry) => {
-      // 先添加到歷史記錄
+      // 添加到歷史記錄
       gameState.addHistoryItem(entry);
-      // 然後設置照片和狀態
-      gameState.setGeneratedPhoto(entry.photoUrl);
-      gameState.setGameState(GameState.PHOTO_RESULT);
+      // 設置城市照片 URL
+      gameState.setCityPhotoUrl(entry.cityPhotoUrl);
     },
     onLoadingChange: gameState.setLoading,
   });
@@ -126,7 +123,7 @@ const App: React.FC = () => {
     }
   }, [gameState.currentLat, gameState.setCityOptions, gameState.setGameState, gameState.setLoading, showError]);
 
-  const handleCitySelect = useCallback((city: City) => {
+  const handleCitySelect = useCallback(async (city: City) => {
     gameState.setSelectedCity(city);
     gameState.setCurrentLat(city.latitude);
     gameState.setCityIntro(`歡迎來到 ${city.name}！${city.description}`);
@@ -134,23 +131,37 @@ const App: React.FC = () => {
     const randomLandmarks = getRandomElements(city.landmarks, GAME_CONFIG.LANDMARKS_PER_CITY);
     gameState.setLandmarkOptions(randomLandmarks);
     
+    // 生成城市照片（先設置臨時的 landmark，實際選擇時會更新）
+    const tempLandmark = randomLandmarks[0];
+    gameState.setSelectedLandmark(tempLandmark);
+    
+    try {
+      await photoGeneration.generateCityPhoto(city, tempLandmark);
+    } catch (e) {
+      console.error('生成城市照片失敗:', e);
+      showError('生成城市照片時發生錯誤，請檢查網路連線或稍後再試');
+    }
+    
     gameState.setGameState(GameState.LANDMARK_SELECTION);
-  }, [gameState]);
+  }, [gameState, photoGeneration, showError]);
 
   const handleLandmarkSelect = useCallback(async (landmark: Landmark) => {
     if (!gameState.selectedCity) return;
     
     gameState.setSelectedLandmark(landmark);
-    gameState.setGameState(GameState.PHOTO_GENERATION);
-
-    try {
-      await photoGeneration.generatePhoto(gameState.selectedCity, landmark);
-    } catch (e) {
-      console.error(e);
-      showError('生成照片時發生錯誤，請檢查網路連線或稍後再試');
-      gameState.setGameState(GameState.LANDMARK_SELECTION);
+    
+    // 更新歷史記錄中的 landmark（如果城市照片已經生成）
+    if (gameState.history.length > 0) {
+      const latestHistoryItem = gameState.history[gameState.history.length - 1];
+      if (latestHistoryItem && latestHistoryItem.city.name === gameState.selectedCity.name) {
+        // 更新最後一筆記錄的 landmark
+        gameState.updateLastHistoryItem({ landmark });
+      }
     }
-  }, [gameState.selectedCity, gameState.setSelectedLandmark, gameState.setGameState, photoGeneration, showError]);
+    
+    // 直接進入下一輪
+    handleNextRound();
+  }, [gameState.selectedCity, gameState.setSelectedLandmark, gameState.history, gameState.updateLastHistoryItem, handleNextRound]);
 
   const handleNextRound = useCallback(() => {
     if (gameState.currentRound >= TOTAL_ROUNDS) {
@@ -198,7 +209,7 @@ const App: React.FC = () => {
             <div class="round-badge">第 ${item.round} 站</div>
             <div class="location">${item.city.name}, ${item.city.country}</div>
             <div class="landmark">📍 ${item.landmark.name}</div>
-            <img src="${item.photoUrl}" class="photo" alt="${item.landmark.name}" />
+            <img src="${item.cityPhotoUrl}" class="photo" alt="Ailisha 在 ${item.city.name}" style="aspect-ratio: 9/19; object-fit: cover;" />
             <p class="diary">"${item.diaryEntry || ''}"</p>
             ${item.date ? `<p class="date" style="color: #999; font-size: 12px; margin-top: 10px;">${item.date}</p>` : ''}
           </div>
@@ -267,6 +278,7 @@ const App: React.FC = () => {
         return (
           <LandmarkSelectionScreen
             cityIntro={gameState.cityIntro}
+            cityPhotoUrl={gameState.cityPhotoUrl}
             landmarkOptions={gameState.landmarkOptions}
             onLandmarkSelect={handleLandmarkSelect}
           />
@@ -274,17 +286,6 @@ const App: React.FC = () => {
       
       case GameState.PHOTO_GENERATION:
         return <LoadingScreen message={gameState.loadingState.message} />;
-      
-      case GameState.PHOTO_RESULT:
-        return (
-          <PhotoResultScreen
-            currentRound={gameState.currentRound}
-            selectedCity={gameState.selectedCity}
-            generatedPhoto={gameState.generatedPhoto}
-            latestHistoryItem={latestHistoryItem}
-            onNextRound={handleNextRound}
-          />
-        );
       
       case GameState.SUMMARY:
         return (

@@ -13,7 +13,8 @@
 ## ✨ 功能特色
 
 - 🌍 **環球旅行體驗**：從台北 101 出發，順時針環遊世界 6 站
-- 📸 **AI 生成照片**：使用 Google Gemini API 生成與 Ailisha 的合成旅行照片
+- 📸 **AI 生成城市照片**：使用 Google Gemini API 生成 Ailisha 在城市中自在愜意觀光的照片（9:19 豎版比例）
+- 🎯 **城市主視覺**：每個城市顯示一張 Ailisha 的城市照片作為主視覺，下方是城市介紹和景點選項
 - 📝 **自動日記**：AI 為每次旅行生成感性的日記內容
 - 🎵 **背景音樂**：程序化生成的背景音樂，根據遊戲狀態動態調整
 - 💾 **資料持久化**：自動儲存進度，支援離線繼續遊戲
@@ -33,9 +34,9 @@
 │   └── ErrorBoundary.tsx # 錯誤邊界
 ├── hooks/              # 自訂 React Hooks
 │   ├── useGameState.ts # 遊戲狀態管理
-│   └── usePhotoGeneration.ts # 照片生成邏輯
+│   └── usePhotoGeneration.ts # 城市照片生成邏輯
 ├── services/           # API 服務
-│   └── geminiService.ts # Gemini API 整合
+│   └── geminiService.ts # Gemini API 整合（城市照片生成）
 ├── utils/              # 工具函數
 │   ├── env.ts          # 環境變數驗證
 │   ├── constants.ts    # 常數定義
@@ -73,14 +74,13 @@
    ```
 
 2. **設置環境變數**
-   ```bash
-   cp .env.example .env.local
-   ```
    
-   編輯 `.env.local` 並填入您的 Gemini API Key：
+   創建 `.env.local` 檔案並填入您的 Gemini API Key：
    ```
    VITE_GEMINI_API_KEY=your_api_key_here
    ```
+   
+   ⚠️ **重要**：API Key 僅從環境變數讀取，不會在 UI 中顯示，確保安全性。
 
 3. **啟動開發伺服器**
    ```bash
@@ -170,6 +170,24 @@
 - ✅ **錯誤處理**：優雅的錯誤處理和用戶提示
 
 ## 🔄 版本更新
+
+### v1.1.0 (2024-12-XX)
+
+#### 重大變更
+- 🔄 **重新設計照片生成機制**：移除景點照片生成，改為每個城市生成一張 Ailisha 在城市中觀光的照片（9:19 豎版比例）
+- 🎨 **優化 UI 體驗**：城市照片作為主視覺，下方顯示城市介紹和景點選項
+- 🔒 **安全性提升**：移除 API Key 設定按鈕，僅從環境變數讀取，避免 API Key 曝光
+
+#### 新增功能
+- ✅ 城市照片生成功能（generateCityPhoto）
+- ✅ 城市照片主視覺顯示（LandmarkSelectionScreen）
+- ✅ 改進的 Ailisha 臉部一致性（使用參考圖片）
+
+#### 技術優化
+- ✅ 優化照片生成 prompt，強調臉部一致性
+- ✅ 改進遊戲流程，選擇景點後直接進入下一輪
+- ✅ 更新數據結構（photoUrl → cityPhotoUrl）
+- ✅ 向後兼容性處理（自動轉換舊數據）
 
 ### v1.0.0 (2024-12-13)
 
