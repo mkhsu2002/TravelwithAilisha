@@ -6,6 +6,10 @@
 
 一個互動式的世界旅行遊戲，與 AI 導遊 Ailisha 一起環遊世界，創造回憶和照片。
 
+**當前版本**: v1.0.0  
+**穩定版本**: [stable/v1.0](https://github.com/mkhsu2002/TravelwithAilisha/tree/stable/v1.0)  
+**開發版本**: [dev/v1.1](https://github.com/mkhsu2002/TravelwithAilisha/tree/dev/v1.1)
+
 ## ✨ 功能特色
 
 - 🌍 **環球旅行體驗**：從台北 101 出發，順時針環遊世界 6 站
@@ -96,9 +100,34 @@
 - `npm run format` - 格式化代碼（Prettier）
 - `npm run type-check` - 類型檢查
 
+## 🌿 分支管理
+
+本專案使用以下分支策略：
+
+- **`main`** - 主分支，包含最新的穩定代碼
+- **`stable/v1.0`** - v1.0 穩定版本分支，用於生產環境部署
+- **`dev/v1.1`** - v1.1 開發分支，用於新功能開發和測試
+
+### 版本說明
+
+- **v1.0.0** (stable/v1.0) - 初始穩定版本
+  - 完整的環球旅行功能
+  - AI 照片生成
+  - 日記生成
+  - 資料持久化
+  - API Key 管理系統
+
+- **v1.1.0** (dev/v1.1) - 開發中版本
+  - 新功能和改進將在此分支開發
+
 ## 📦 部署
 
 本專案已配置為使用 Cloudflare Pages 進行自動部署。詳細部署說明請參考 [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+### 部署分支
+
+- **生產環境**: 從 `stable/v1.0` 分支部署
+- **預覽環境**: 從 `dev/v1.1` 分支部署
 
 ### 快速部署步驟
 
@@ -139,6 +168,35 @@
 - ✅ **環境變數驗證**：啟動時驗證必要的環境變數
 - ✅ **檔案驗證**：驗證上傳檔案的類型和大小
 - ✅ **錯誤處理**：優雅的錯誤處理和用戶提示
+
+## 🔄 版本更新
+
+### v1.0.0 (2024-12-13)
+
+#### 新增功能
+- ✅ 完整的環球旅行體驗（6 站）
+- ✅ AI 生成旅行照片（使用 Gemini API）
+- ✅ 自動生成日記內容
+- ✅ API Key 管理系統（Context API）
+- ✅ 資料持久化（localStorage）
+- ✅ 背景音樂系統
+- ✅ 響應式設計
+
+#### 技術優化
+- ✅ 組件化架構重構
+- ✅ TypeScript 類型安全
+- ✅ 錯誤處理和 Toast 通知
+- ✅ 圖片壓縮和驗證
+- ✅ 性能優化（useMemo, useCallback）
+- ✅ ESLint 和 Prettier 配置
+- ✅ Cloudflare Pages 自動部署
+
+#### 修復問題
+- ✅ 移除 Tailwind CDN，改用 PostCSS
+- ✅ 修復 Context Provider 錯誤
+- ✅ 修復日記內容顯示
+- ✅ 修復日期計算邏輯
+- ✅ 整合 Ailisha.jpg 用於頭像和照片生成
 
 ## 📝 開發指南
 
