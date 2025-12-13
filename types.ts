@@ -31,6 +31,7 @@ export interface TravelHistoryItem {
   landmark: Landmark;
   photoUrl: string;
   diaryEntry: string;
+  date: string; // 格式：YYYY/MM/DD
 }
 
 export interface UserData {

@@ -40,15 +40,17 @@ export const PhotoResultScreen: React.FC<PhotoResultScreenProps> = ({
           </div>
         )}
         <div className="mt-5 px-3 pb-3">
-          <p className="font-handwriting text-gray-700 text-center text-lg italic leading-relaxed">
-            "{latestHistoryItem?.diaryEntry}"
-          </p>
+          {latestHistoryItem?.diaryEntry && (
+            <p className="font-handwriting text-gray-700 text-center text-lg italic leading-relaxed mb-4">
+              "{latestHistoryItem.diaryEntry}"
+            </p>
+          )}
           <div className="flex justify-between items-center mt-4 border-t border-gray-100 pt-3">
             <span className="text-xs font-bold text-pink-500 bg-pink-50 px-2 py-1 rounded-md">
               {selectedCity?.name}
             </span>
             <span className="text-xs text-gray-400">
-              {new Date().toLocaleDateString()}
+              {latestHistoryItem?.date || new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/')}
             </span>
           </div>
         </div>

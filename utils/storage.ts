@@ -49,7 +49,19 @@ export const saveHistory = (history: TravelHistoryItem[]): void => {
 export const loadHistory = (): TravelHistoryItem[] => {
   try {
     const data = localStorage.getItem(STORAGE_KEYS.HISTORY);
-    return data ? JSON.parse(data) : [];
+    const history = data ? JSON.parse(data) : [];
+    
+    // 向後兼容：為沒有日期的舊記錄生成日期
+    return history.map((item: TravelHistoryItem) => {
+      if (!item.date) {
+        const baseDate = new Date();
+        const daysToAdd = (item.round - 1) * 14; // 每站間隔兩週
+        const travelDate = new Date(baseDate);
+        travelDate.setDate(baseDate.getDate() + daysToAdd);
+        item.date = `${travelDate.getFullYear()}/${String(travelDate.getMonth() + 1).padStart(2, '0')}/${String(travelDate.getDate()).padStart(2, '0')}`;
+      }
+      return item;
+    });
   } catch (error) {
     console.error('讀取歷史記錄失敗:', error);
     return [];

@@ -46,13 +46,21 @@ export const usePhotoGeneration = ({
       // 2. 生成日記
       const diary = await generateDiaryEntry(city.name, landmark.name, apiKey);
 
-      // 3. 創建歷史記錄項目
+      // 3. 計算日期（每站間隔兩週，從今天開始）
+      const baseDate = new Date();
+      const daysToAdd = (currentRound - 1) * 14; // 每站間隔兩週（14天）
+      const travelDate = new Date(baseDate);
+      travelDate.setDate(baseDate.getDate() + daysToAdd);
+      const dateString = `${travelDate.getFullYear()}/${String(travelDate.getMonth() + 1).padStart(2, '0')}/${String(travelDate.getDate()).padStart(2, '0')}`;
+
+      // 4. 創建歷史記錄項目
       const newEntry: TravelHistoryItem = {
         round: currentRound,
         city,
         landmark,
         photoUrl,
         diaryEntry: diary,
+        date: dateString,
       };
 
       onSuccess(newEntry);

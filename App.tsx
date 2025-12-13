@@ -195,7 +195,8 @@ const App: React.FC = () => {
             <div class="location">${item.city.name}, ${item.city.country}</div>
             <div class="landmark">📍 ${item.landmark.name}</div>
             <img src="${item.photoUrl}" class="photo" alt="${item.landmark.name}" />
-            <p class="diary">"${item.diaryEntry}"</p>
+            <p class="diary">"${item.diaryEntry || ''}"</p>
+            ${item.date ? `<p class="date" style="color: #999; font-size: 12px; margin-top: 10px;">${item.date}</p>` : ''}
           </div>
         `).join('')}
         <div class="footer">
