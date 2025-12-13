@@ -33,7 +33,7 @@ export const LandmarkSelectionScreen: React.FC<LandmarkSelectionScreenProps> = (
           {cityPhotoPrompt && (
             <button
               onClick={() => setPromptModalOpen(true)}
-              className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+              className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white p-2 rounded-lg transition-all shadow-lg"
               aria-label="查看提示詞"
               title="查看提示詞"
             >

@@ -61,9 +61,14 @@ const App: React.FC = () => {
     }
   }, [gameState.userData, persistUserData]);
 
+  // 儲存歷史記錄（但不保存 base64 圖片以避免配額超出）
   useEffect(() => {
     if (gameState.history.length > 0) {
-      saveHistory(gameState.history);
+      // 使用防抖，避免頻繁寫入
+      const timeoutId = setTimeout(() => {
+        saveHistory(gameState.history);
+      }, 500);
+      return () => clearTimeout(timeoutId);
     }
   }, [gameState.history]);
 
@@ -191,7 +196,10 @@ const App: React.FC = () => {
       console.error('生成景點合照錯誤:', e);
       const errorMessage = e?.message || '未知錯誤';
       showError(`生成景點合照時發生錯誤: ${errorMessage}`);
+      // 確保回到景點選擇畫面，不要直接跳過
       gameState.setGameState(GameState.LANDMARK_SELECTION);
+      // 不要調用 handleNextRound，讓用戶重新選擇
+      return;
     }
   }, [gameState.selectedCity, gameState.setSelectedLandmark, gameState.setGameState, gameState.history, gameState.updateLastHistoryItem, photoGeneration, showError, handleNextRound]);
 

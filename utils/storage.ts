@@ -35,12 +35,51 @@ export const loadUserData = (): UserData | null => {
 
 /**
  * 儲存旅行歷史
+ * 注意：不保存 base64 圖片數據以避免 localStorage 配額超出
  */
 export const saveHistory = (history: TravelHistoryItem[]): void => {
   try {
-    localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
-  } catch (error) {
-    console.error('儲存歷史記錄失敗:', error);
+    // 創建一個不包含 base64 圖片的版本用於存儲
+    // 圖片數據只保存在內存中，不持久化到 localStorage
+    const historyForStorage = history.map(item => ({
+      round: item.round,
+      city: item.city,
+      landmark: item.landmark,
+      cityPhotoUrl: '', // 不保存 base64，只保存空字串作為標記
+      cityPhotoPrompt: item.cityPhotoPrompt || '',
+      landmarkPhotoUrl: '', // 不保存 base64，只保存空字串作為標記
+      landmarkPhotoPrompt: item.landmarkPhotoPrompt || '',
+      diaryEntry: item.diaryEntry,
+      date: item.date,
+    }));
+    
+    localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(historyForStorage));
+  } catch (error: any) {
+    // 如果還是超出配額，嘗試清理舊數據
+    if (error?.name === 'QuotaExceededError') {
+      console.warn('localStorage 配額超出，嘗試清理舊數據...');
+      try {
+        // 只保留最近 3 條記錄
+        const recentHistory = history.slice(-3);
+        const historyForStorage = recentHistory.map(item => ({
+          round: item.round,
+          city: item.city,
+          landmark: item.landmark,
+          cityPhotoUrl: '',
+          cityPhotoPrompt: item.cityPhotoPrompt || '',
+          landmarkPhotoUrl: '',
+          landmarkPhotoPrompt: item.landmarkPhotoPrompt || '',
+          diaryEntry: item.diaryEntry,
+          date: item.date,
+        }));
+        localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(historyForStorage));
+        console.warn('已清理舊數據，只保留最近 3 條記錄');
+      } catch (retryError) {
+        console.error('清理後仍然無法儲存:', retryError);
+      }
+    } else {
+      console.error('儲存歷史記錄失敗:', error);
+    }
   }
 };
 

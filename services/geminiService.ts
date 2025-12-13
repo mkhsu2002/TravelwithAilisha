@@ -86,21 +86,24 @@ export const generateCityPhoto = async (
   const outfitDesc = getOutfitForVibe(vibe);
 
   // 生成 Ailisha 在城市中自在愜意觀光的照片
+  // 強調使用參考圖片來確保臉部一致性
   const prompt = `
+    You MUST use the reference image provided to generate Ailisha's face. The reference image shows Ailisha's exact appearance.
+    
     Generate a realistic, high-quality vertical travel photo (9:16 aspect ratio) of Ailisha exploring and enjoying ${cityName}.
     
-    CRITICAL REQUIREMENTS FOR AILISHA:
-    - The reference image shows Ailisha's exact face, features, and appearance.
-    - Ailisha MUST have IDENTICAL facial features to the person in the reference image:
-      * Same face shape and structure
-      * Same eyes (shape, color, expression)
-      * Same nose
-      * Same mouth and smile
-      * Same hair (style, color, length)
-      * Same skin tone
-      * Same overall facial appearance
-    - DO NOT create a generic face. The face MUST be an exact match to the reference image.
-    - Outfit: ${outfitDesc} (clothing can change, but face must remain identical)
+    CRITICAL REQUIREMENTS - USE THE REFERENCE IMAGE FOR AILISHA'S FACE:
+    - The reference image (first image) shows Ailisha's EXACT face, features, and appearance.
+    - You MUST replicate the person in the reference image EXACTLY:
+      * IDENTICAL face shape and structure
+      * IDENTICAL eyes (shape, color, expression)
+      * IDENTICAL nose
+      * IDENTICAL mouth and smile
+      * IDENTICAL hair (style, color, length)
+      * IDENTICAL skin tone
+      * IDENTICAL overall facial appearance and features
+    - DO NOT create a generic or different face. The face MUST be an EXACT COPY of the reference image.
+    - Outfit: ${outfitDesc} (clothing can change, but face must remain IDENTICAL to reference)
     - Pose: Ailisha is exploring the city naturally, looking relaxed and happy. She might be:
       * Walking through a street market
       * Standing at a viewpoint overlooking the city
@@ -113,7 +116,7 @@ export const generateCityPhoto = async (
     
     Style: Professional travel photography, vibrant colors, natural lighting, Instagram-worthy composition, 4k resolution, vertical format (9:16 aspect ratio).
     
-    IMPORTANT: Ailisha's face must be pixel-perfect identical to the reference image. This is the most critical requirement. The photo should capture the feeling of exploring and enjoying the city.
+    MOST IMPORTANT: Ailisha's face must be pixel-perfect identical to the reference image. Copy the face from the reference image exactly. This is the absolute top priority.
   `;
 
   try {
@@ -205,29 +208,34 @@ export const generateSouvenirPhoto = async (
 
   // 改進的 PROMPT: 更強調臉部一致性和參考圖片的使用
   const prompt = `
-    You are generating a realistic, high-quality wide-angle travel selfie photograph of two people standing together in front of the famous landmark "${landmarkName}" in ${cityName}.
+    You MUST use the reference images provided to generate the faces. The FIRST reference image is Ailisha, the SECOND is the User.
+    
+    Generate a realistic, high-quality wide-angle travel selfie photograph of two people standing together in front of the famous landmark "${landmarkName}" in ${cityName}.
     
     CRITICAL REQUIREMENTS FOR PERSON 2 (Ailisha, on the RIGHT):
-    - The second reference image shows Ailisha's exact face, features, and appearance.
-    - Person 2 MUST have IDENTICAL facial features to the person in the second reference image:
-      * Same face shape and structure
-      * Same eyes (shape, color, expression)
-      * Same nose
-      * Same mouth and smile
-      * Same hair (style, color, length)
-      * Same skin tone
-      * Same overall facial appearance
-    - DO NOT create a generic face. The face MUST be an exact match to the reference image.
-    - Outfit: ${outfitDesc} (clothing can change, but face must remain identical)
+    - The FIRST reference image shows Ailisha's EXACT face, features, and appearance.
+    - Person 2 MUST have IDENTICAL facial features to the person in the FIRST reference image:
+      * IDENTICAL face shape and structure
+      * IDENTICAL eyes (shape, color, expression)
+      * IDENTICAL nose
+      * IDENTICAL mouth and smile
+      * IDENTICAL hair (style, color, length)
+      * IDENTICAL skin tone
+      * IDENTICAL overall facial appearance
+    - DO NOT create a generic or different face. The face MUST be an EXACT COPY of the FIRST reference image (Ailisha).
+    - Outfit: ${outfitDesc} (clothing can change, but face must remain IDENTICAL to first reference)
     - Pose: Standing close to Person 1, looking energetic and friendly, maybe making a peace sign or pointing at the landmark
     
-    Person 1 (Left): Matches the facial features, hair, and gender of the person in the first reference image (User). They are smiling at the camera.
+    CRITICAL REQUIREMENTS FOR PERSON 1 (User, on the LEFT):
+    - The SECOND reference image shows the User's exact face, features, and appearance.
+    - Person 1 MUST match the facial features, hair, and gender of the person in the SECOND reference image (User).
+    - They are smiling at the camera.
     
     Background: Clearly visible ${landmarkName}, ${landmarkDesc}. The landmark should be recognizable and prominent.
     
     Style: Professional travel photography, vibrant colors, influencer selfie style, 4k resolution, natural lighting.
     
-    IMPORTANT: Person 2's face must be pixel-perfect identical to the second reference image. This is the most critical requirement.
+    MOST IMPORTANT: Person 2's (Ailisha's) face must be pixel-perfect identical to the FIRST reference image. Copy Ailisha's face from the first reference image exactly. This is the absolute top priority.
   `;
 
   try {
