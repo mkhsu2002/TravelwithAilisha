@@ -13,7 +13,7 @@ export const loadAilishaImage = async (): Promise<string> => {
   }
 
   try {
-    const response = await fetch('/assets/Ailisha.jpg');
+    const response = await fetch('/Ailisha.jpg');
     const blob = await response.blob();
     
     return new Promise((resolve, reject) => {
@@ -37,6 +37,6 @@ export const loadAilishaImage = async (): Promise<string> => {
  * 獲取 Ailisha 頭像 URL（用於 UI 顯示）
  */
 export const getAilishaAvatarUrl = (): string => {
-  return '/assets/Ailisha.jpg';
+  return '/Ailisha.jpg';
 };
 
