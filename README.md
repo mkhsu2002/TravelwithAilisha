@@ -2,19 +2,182 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# 與 Ailisha 艾莉莎環遊世界
 
-This contains everything you need to run your app locally.
+一個互動式的世界旅行遊戲，與 AI 導遊 Ailisha 一起環遊世界，創造回憶和照片。
 
-View your app in AI Studio: https://ai.studio/apps/drive/1YYhUThYTfVgl0jGLVze1Rh1xhdbLNnKA
+## ✨ 功能特色
 
-## Run Locally
+- 🌍 **環球旅行體驗**：從台北 101 出發，順時針環遊世界 6 站
+- 📸 **AI 生成照片**：使用 Google Gemini API 生成與 Ailisha 的合成旅行照片
+- 📝 **自動日記**：AI 為每次旅行生成感性的日記內容
+- 🎵 **背景音樂**：程序化生成的背景音樂，根據遊戲狀態動態調整
+- 💾 **資料持久化**：自動儲存進度，支援離線繼續遊戲
+- 📥 **匯出遊記**：下載完整的 HTML 遊記檔案
 
-**Prerequisites:**  Node.js
+## 🏗️ 專案架構
 
+### 目錄結構
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```
+├── components/          # React 組件
+│   ├── screens/        # 各個遊戲畫面組件
+│   ├── Button.tsx      # 可重用按鈕組件
+│   ├── PhotoUpload.tsx # 圖片上傳組件
+│   ├── BackgroundMusic.tsx # 背景音樂組件
+│   ├── Toast.tsx       # 通知系統
+│   └── ErrorBoundary.tsx # 錯誤邊界
+├── hooks/              # 自訂 React Hooks
+│   ├── useGameState.ts # 遊戲狀態管理
+│   └── usePhotoGeneration.ts # 照片生成邏輯
+├── services/           # API 服務
+│   └── geminiService.ts # Gemini API 整合
+├── utils/              # 工具函數
+│   ├── env.ts          # 環境變數驗證
+│   ├── constants.ts    # 常數定義
+│   ├── imageUtils.ts   # 圖片處理工具
+│   ├── travelLogic.ts  # 旅行邏輯
+│   └── storage.ts      # 本地儲存工具
+├── types/              # TypeScript 類型定義
+│   ├── api.ts          # API 回應類型
+│   └── index.ts        # 主要類型定義
+└── data.ts             # 城市和地標資料庫
+```
+
+### 技術棧
+
+- **前端框架**: React 19 + TypeScript
+- **建置工具**: Vite 6
+- **樣式**: Tailwind CSS
+- **AI 服務**: Google Gemini API
+- **音訊**: Web Audio API
+- **部署**: Cloudflare Pages
+
+## 🚀 快速開始
+
+### 前置需求
+
+- Node.js 20+ 
+- npm 或 yarn
+- Gemini API Key（從 [Google AI Studio](https://makersuite.google.com/app/apikey) 獲取）
+
+### 本地開發
+
+1. **安裝依賴**
+   ```bash
+   npm install
+   ```
+
+2. **設置環境變數**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   編輯 `.env.local` 並填入您的 Gemini API Key：
+   ```
+   VITE_GEMINI_API_KEY=your_api_key_here
+   ```
+
+3. **啟動開發伺服器**
+   ```bash
+   npm run dev
+   ```
+
+4. **訪問應用**
+   打開瀏覽器訪問 `http://localhost:3000`
+
+### 可用腳本
+
+- `npm run dev` - 啟動開發伺服器
+- `npm run build` - 建置生產版本
+- `npm run preview` - 預覽生產版本
+- `npm run lint` - 執行 ESLint 檢查
+- `npm run lint:fix` - 自動修復 ESLint 問題
+- `npm run format` - 格式化代碼（Prettier）
+- `npm run type-check` - 類型檢查
+
+## 📦 部署
+
+本專案已配置為使用 Cloudflare Pages 進行自動部署。詳細部署說明請參考 [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+### 快速部署步驟
+
+1. **使用 GitHub Actions（推薦）**
+   - 推送代碼到 GitHub
+   - 在 GitHub Secrets 中設置：
+     - `VITE_GEMINI_API_KEY`
+     - `CLOUDFLARE_API_TOKEN`
+     - `CLOUDFLARE_ACCOUNT_ID`
+   - GitHub Actions 會自動建置和部署
+
+2. **使用 Cloudflare Dashboard**
+   - 連接 GitHub 倉庫
+   - 設置建置命令：`npm run build`
+   - 設置輸出目錄：`dist`
+   - 添加環境變數：`VITE_GEMINI_API_KEY`
+
+## 🎯 專案特色與優化
+
+### 代碼品質
+
+- ✅ **組件化架構**：將大型組件拆分為可重用的小組件
+- ✅ **自訂 Hooks**：封裝複雜的狀態邏輯
+- ✅ **TypeScript**：完整的類型安全
+- ✅ **錯誤處理**：Error Boundary 和 Toast 通知系統
+- ✅ **性能優化**：useMemo、useCallback 優化渲染
+
+### 用戶體驗
+
+- ✅ **圖片壓縮**：自動壓縮上傳的圖片
+- ✅ **載入狀態**：清晰的載入提示
+- ✅ **資料持久化**：自動儲存進度
+- ✅ **無障礙性**：ARIA 標籤和鍵盤導航支援
+- ✅ **響應式設計**：適配各種螢幕尺寸
+
+### 安全性
+
+- ✅ **環境變數驗證**：啟動時驗證必要的環境變數
+- ✅ **檔案驗證**：驗證上傳檔案的類型和大小
+- ✅ **錯誤處理**：優雅的錯誤處理和用戶提示
+
+## 📝 開發指南
+
+### 添加新城市
+
+編輯 `data.ts` 檔案，在對應的回合陣列中添加城市資料：
+
+```typescript
+{
+  name: "城市名稱",
+  country: "國家",
+  latitude: 緯度,
+  vibe: "urban" | "beach" | "historic" | "nature" | "cold" | "desert",
+  description: "城市描述",
+  landmarks: [
+    {
+      name: "地標名稱",
+      description: "地標描述",
+      bestAngle: "最佳拍攝角度"
+    }
+  ]
+}
+```
+
+### 自訂樣式
+
+專案使用 Tailwind CSS，可以在組件中直接使用 Tailwind 類別，或編輯 `index.html` 中的自訂樣式。
+
+## 🤝 貢獻
+
+歡迎提交 Issue 和 Pull Request！
+
+## 📄 授權
+
+本專案為私有專案。
+
+## 🙏 致謝
+
+- [Google Gemini API](https://ai.google.dev/)
+- [Cloudflare Pages](https://pages.cloudflare.com/)
+- [Vite](https://vitejs.dev/)
+- [React](https://react.dev/)

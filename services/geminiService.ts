@@ -1,9 +1,38 @@
 import { GoogleGenAI } from "@google/genai";
 import { CityVibe } from "../types";
+import { GeminiImageResponse, GeminiTextResponse } from "../types/api";
 
-// Initialize the client. 
-// NOTE: API Key is managed via process.env.API_KEY as per instructions.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Initialize the client
+let aiInstance: GoogleGenAI | null = null;
+let currentApiKey: string | null = null;
+
+/**
+ * 初始化或更新 AI 客戶端
+ * @param apiKey - Gemini API Key
+ */
+export const initializeAI = (apiKey: string): GoogleGenAI => {
+  if (!apiKey) {
+    throw new Error('API Key 未設定。請在右上角點擊「設定 API Key」進行配置。');
+  }
+
+  // 如果 API Key 改變或實例不存在，創建新實例
+  if (!aiInstance || currentApiKey !== apiKey) {
+    aiInstance = new GoogleGenAI({ apiKey });
+    currentApiKey = apiKey;
+  }
+  
+  return aiInstance;
+};
+
+/**
+ * 獲取 AI 實例（需要先初始化）
+ */
+const getAI = (): GoogleGenAI => {
+  if (!aiInstance) {
+    throw new Error('AI 客戶端未初始化。請先配置 API Key。');
+  }
+  return aiInstance;
+};
 
 // --- API Functions ---
 
@@ -32,8 +61,11 @@ export const generateSouvenirPhoto = async (
   cityName: string,
   landmarkName: string,
   landmarkDesc: string,
-  vibe: CityVibe
+  vibe: CityVibe,
+  apiKey: string
 ): Promise<string> => {
+  // 確保 AI 客戶端已初始化
+  initializeAI(apiKey);
   const model = "gemini-3-pro-image-preview";
 
   // Clean base64 strings
@@ -61,6 +93,7 @@ export const generateSouvenirPhoto = async (
   `;
 
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model,
       contents: {
@@ -75,10 +108,11 @@ export const generateSouvenirPhoto = async (
             imageSize: "1K"
         }
       }
-    });
+    }) as unknown as GeminiImageResponse;
 
     // Check for image in response
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
+    const parts = response.candidates?.[0]?.content?.parts || [];
+    for (const part of parts) {
       if (part.inlineData) {
         return `data:image/png;base64,${part.inlineData.data}`;
       }
@@ -93,7 +127,9 @@ export const generateSouvenirPhoto = async (
 /**
  * Generate a diary entry for the completed stop
  */
-export const generateDiaryEntry = async (city: string, landmark: string): Promise<string> => {
+export const generateDiaryEntry = async (city: string, landmark: string, apiKey: string): Promise<string> => {
+  // 確保 AI 客戶端已初始化
+  initializeAI(apiKey);
    const model = "gemini-2.5-flash";
    const prompt = `
      請用繁體中文為一張在 ${city} ${landmark} 拍攝的照片寫一段簡短、感性的社群媒體貼文。
@@ -101,9 +137,11 @@ export const generateDiaryEntry = async (city: string, landmark: string): Promis
      字數在 50 字以內。
    `;
    
+   const ai = getAI();
    const response = await ai.models.generateContent({
        model,
        contents: prompt
-   });
+   }) as unknown as GeminiTextResponse;
+   
    return response.text || `在 ${city} 的 ${landmark} 度過了美好的一天！`;
 }
