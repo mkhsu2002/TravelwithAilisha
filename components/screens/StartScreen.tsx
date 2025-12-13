@@ -3,6 +3,7 @@ import { UserData } from '../../types';
 import { Button } from '../Button';
 import { PhotoUpload } from '../PhotoUpload';
 import { compressImage, validateImageFile } from '../../utils/imageUtils';
+import { logger } from '../../utils/logger';
 
 interface StartScreenProps {
   userData: UserData;
@@ -41,12 +42,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
     } catch (error: unknown) {
       onError?.('圖片處理失敗，請重試');
       // 錯誤已通過 onError 回調處理，這裡只記錄
-      if (error instanceof Error) {
-        // 使用動態導入避免循環依賴
-        import('../../utils/logger').then(({ logger }) => {
-          logger.error('圖片處理失敗', 'StartScreen', error);
-        });
-      }
+      logger.error('圖片處理失敗', 'StartScreen', error);
     }
   };
 

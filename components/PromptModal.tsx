@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { logger } from '../../utils/logger';
+import { logger } from '../utils/logger';
 
 interface PromptModalProps {
   isOpen: boolean;
