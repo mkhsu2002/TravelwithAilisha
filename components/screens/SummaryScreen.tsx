@@ -35,13 +35,24 @@ export const SummaryScreen: React.FC<SummaryScreenProps> = ({
             </div>
             
             <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl shadow-lg border border-gray-50 hover:-translate-y-1 transition-transform duration-300">
-              <div className="mb-4 rounded-xl overflow-hidden shadow-inner" style={{ aspectRatio: '9/19' }}>
+              {/* 城市照片 */}
+              <div className="mb-3 rounded-xl overflow-hidden shadow-inner" style={{ aspectRatio: '9/19' }}>
                 <img
                   src={item.cityPhotoUrl}
                   alt={`Ailisha 在 ${item.city.name}`}
                   className="w-full h-full object-cover"
                 />
               </div>
+              {/* 景點合照 */}
+              {item.landmarkPhotoUrl && (
+                <div className="mb-4 rounded-xl overflow-hidden shadow-inner" style={{ aspectRatio: '1/1' }}>
+                  <img
+                    src={item.landmarkPhotoUrl}
+                    alt={`與 Ailisha 在 ${item.landmark.name}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
               <h3 className="font-bold text-xl text-gray-800 mb-1">
                 {item.city.name}, {item.city.country}
               </h3>

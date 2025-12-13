@@ -84,6 +84,7 @@ const App: React.FC = () => {
 
   // Photo Generation Hook
   const photoGeneration = usePhotoGeneration({
+    userSelfieBase64: gameState.userData.selfieBase64,
     currentRound: gameState.currentRound,
     onSuccess: (entry) => {
       // 添加到歷史記錄
@@ -123,6 +124,18 @@ const App: React.FC = () => {
     }
   }, [gameState.currentLat, gameState.setCityOptions, gameState.setGameState, gameState.setLoading, showError]);
 
+  const handleNextRound = useCallback(() => {
+    if (gameState.currentRound >= TOTAL_ROUNDS) {
+      gameState.setGameState(GameState.SUMMARY);
+    } else {
+      gameState.nextRound();
+      if (gameState.selectedCity) {
+        gameState.setCurrentLocation(gameState.selectedCity.name);
+        loadCityOptionsForRound(gameState.currentRound + 1);
+      }
+    }
+  }, [gameState.currentRound, gameState.selectedCity, gameState.setGameState, gameState.nextRound, gameState.setCurrentLocation, loadCityOptionsForRound]);
+
   const handleCitySelect = useCallback(async (city: City) => {
     gameState.setSelectedCity(city);
     gameState.setCurrentLat(city.latitude);
@@ -149,31 +162,35 @@ const App: React.FC = () => {
     if (!gameState.selectedCity) return;
     
     gameState.setSelectedLandmark(landmark);
-    
-    // 更新歷史記錄中的 landmark（如果城市照片已經生成）
-    if (gameState.history.length > 0) {
-      const latestHistoryItem = gameState.history[gameState.history.length - 1];
-      if (latestHistoryItem && latestHistoryItem.city.name === gameState.selectedCity.name) {
-        // 更新最後一筆記錄的 landmark
-        gameState.updateLastHistoryItem({ landmark });
-      }
-    }
-    
-    // 直接進入下一輪
-    handleNextRound();
-  }, [gameState.selectedCity, gameState.setSelectedLandmark, gameState.history, gameState.updateLastHistoryItem, handleNextRound]);
+    gameState.setGameState(GameState.PHOTO_GENERATION);
 
-  const handleNextRound = useCallback(() => {
-    if (gameState.currentRound >= TOTAL_ROUNDS) {
-      gameState.setGameState(GameState.SUMMARY);
-    } else {
-      gameState.nextRound();
-      if (gameState.selectedCity) {
-        gameState.setCurrentLocation(gameState.selectedCity.name);
-        loadCityOptionsForRound(gameState.currentRound + 1);
+    try {
+      // 生成景點合照
+      const landmarkPhotoUrl = await photoGeneration.generateLandmarkPhoto(
+        gameState.selectedCity,
+        landmark
+      );
+
+      // 更新歷史記錄中的 landmark 和合照
+      if (gameState.history.length > 0) {
+        const latestHistoryItem = gameState.history[gameState.history.length - 1];
+        if (latestHistoryItem && latestHistoryItem.city.name === gameState.selectedCity.name) {
+          // 更新最後一筆記錄的 landmark 和合照
+          gameState.updateLastHistoryItem({ 
+            landmark,
+            landmarkPhotoUrl 
+          });
+        }
       }
+
+      // 進入下一輪
+      handleNextRound();
+    } catch (e) {
+      console.error(e);
+      showError('生成景點合照時發生錯誤，請檢查網路連線或稍後再試');
+      gameState.setGameState(GameState.LANDMARK_SELECTION);
     }
-  }, [gameState, loadCityOptionsForRound]);
+  }, [gameState.selectedCity, gameState.setSelectedLandmark, gameState.setGameState, gameState.history, gameState.updateLastHistoryItem, photoGeneration, showError, handleNextRound]);
 
   const handleDownloadItinerary = useCallback(() => {
     if (gameState.history.length === 0) return;
@@ -209,7 +226,16 @@ const App: React.FC = () => {
             <div class="round-badge">第 ${item.round} 站</div>
             <div class="location">${item.city.name}, ${item.city.country}</div>
             <div class="landmark">📍 ${item.landmark.name}</div>
-            <img src="${item.cityPhotoUrl}" class="photo" alt="Ailisha 在 ${item.city.name}" style="aspect-ratio: 9/19; object-fit: cover;" />
+            <div style="width: 100%; margin-bottom: 15px;">
+              <h4 style="font-size: 14px; color: #999; margin-bottom: 8px; text-align: center;">城市照片</h4>
+              <img src="${item.cityPhotoUrl}" class="photo" alt="Ailisha 在 ${item.city.name}" style="aspect-ratio: 9/19; object-fit: cover; margin-bottom: 15px;" />
+            </div>
+            ${item.landmarkPhotoUrl ? `
+            <div style="width: 100%; margin-bottom: 15px;">
+              <h4 style="font-size: 14px; color: #999; margin-bottom: 8px; text-align: center;">景點合照</h4>
+              <img src="${item.landmarkPhotoUrl}" class="photo" alt="與 Ailisha 在 ${item.landmark.name}" style="aspect-ratio: 1/1; object-fit: cover; margin-bottom: 15px;" />
+            </div>
+            ` : ''}
             <p class="diary">"${item.diaryEntry || ''}"</p>
             ${item.date ? `<p class="date" style="color: #999; font-size: 12px; margin-top: 10px;">${item.date}</p>` : ''}
           </div>

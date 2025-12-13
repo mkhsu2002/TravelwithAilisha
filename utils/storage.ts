@@ -52,15 +52,23 @@ export const loadHistory = (): TravelHistoryItem[] => {
     const data = localStorage.getItem(STORAGE_KEYS.HISTORY);
     const history = data ? JSON.parse(data) : [];
     
-    // 向後兼容：為沒有日期的舊記錄生成日期，將 photoUrl 轉換為 cityPhotoUrl
+    // 向後兼容：為沒有日期的舊記錄生成日期，處理照片 URL
     return history.map((item: TravelHistoryItem) => {
       if (!item.date) {
         item.date = calculateTravelDate(item.round);
       }
-      // 向後兼容：將舊的 photoUrl 轉換為 cityPhotoUrl
-      if ('photoUrl' in item && !('cityPhotoUrl' in item)) {
-        (item as any).cityPhotoUrl = (item as any).photoUrl;
+      // 向後兼容：將舊的 photoUrl 轉換為 landmarkPhotoUrl
+      if ('photoUrl' in item && !('landmarkPhotoUrl' in item)) {
+        (item as any).landmarkPhotoUrl = (item as any).photoUrl;
         delete (item as any).photoUrl;
+      }
+      // 向後兼容：如果沒有 cityPhotoUrl，設置為空字串
+      if (!('cityPhotoUrl' in item)) {
+        (item as any).cityPhotoUrl = '';
+      }
+      // 向後兼容：如果沒有 landmarkPhotoUrl，設置為空字串
+      if (!('landmarkPhotoUrl' in item)) {
+        (item as any).landmarkPhotoUrl = '';
       }
       return item;
     });
