@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { City } from '../../types';
 import { AILISHA_AVATAR_URL } from '../../constants';
 
@@ -8,7 +8,7 @@ interface CitySelectionScreenProps {
   onCitySelect: (city: City) => void;
 }
 
-export const CitySelectionScreen: React.FC<CitySelectionScreenProps> = ({
+const CitySelectionScreenComponent: React.FC<CitySelectionScreenProps> = ({
   currentLocation,
   cityOptions,
   onCitySelect,
@@ -66,4 +66,14 @@ export const CitySelectionScreen: React.FC<CitySelectionScreenProps> = ({
     </div>
   );
 };
+
+// 使用 React.memo 優化渲染性能
+export const CitySelectionScreen = React.memo(CitySelectionScreenComponent, (prevProps, nextProps) => {
+  // 自訂比較邏輯：只有當 cityOptions 或 currentLocation 改變時才重新渲染
+  return (
+    prevProps.currentLocation === nextProps.currentLocation &&
+    prevProps.cityOptions === nextProps.cityOptions &&
+    prevProps.onCitySelect === nextProps.onCitySelect
+  );
+});
 

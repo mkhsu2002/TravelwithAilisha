@@ -56,6 +56,8 @@ export const SummaryScreen: React.FC<SummaryScreenProps> = ({
                   src={item.cityPhotoUrl}
                   alt={`Ailisha 在 ${item.city.name}`}
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
                 {item.cityPhotoPrompt && (
                   <button
@@ -77,6 +79,8 @@ export const SummaryScreen: React.FC<SummaryScreenProps> = ({
                     src={item.landmarkPhotoUrl}
                     alt={`與 Ailisha 在 ${item.landmark.name}`}
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                   {item.landmarkPhotoPrompt && (
                     <button

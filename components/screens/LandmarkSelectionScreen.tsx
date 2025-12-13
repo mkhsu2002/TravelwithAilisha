@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Landmark } from '../../types';
 import { PromptModal } from '../PromptModal';
 
@@ -10,7 +10,7 @@ interface LandmarkSelectionScreenProps {
   onLandmarkSelect: (landmark: Landmark) => void;
 }
 
-export const LandmarkSelectionScreen: React.FC<LandmarkSelectionScreenProps> = ({
+const LandmarkSelectionScreenComponent: React.FC<LandmarkSelectionScreenProps> = ({
   cityIntro,
   cityPhotoUrl,
   cityPhotoPrompt,
@@ -29,6 +29,8 @@ export const LandmarkSelectionScreen: React.FC<LandmarkSelectionScreenProps> = (
             alt="Ailisha 在城市中"
             className="w-full object-cover"
             style={{ aspectRatio: '9/16' }}
+            loading="lazy"
+            decoding="async"
           />
           {cityPhotoPrompt && (
             <button
@@ -105,4 +107,15 @@ export const LandmarkSelectionScreen: React.FC<LandmarkSelectionScreenProps> = (
     </div>
   );
 };
+
+// 使用 React.memo 優化渲染性能
+export const LandmarkSelectionScreen = memo(LandmarkSelectionScreenComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.cityIntro === nextProps.cityIntro &&
+    prevProps.cityPhotoUrl === nextProps.cityPhotoUrl &&
+    prevProps.cityPhotoPrompt === nextProps.cityPhotoPrompt &&
+    prevProps.landmarkOptions === nextProps.landmarkOptions &&
+    prevProps.onLandmarkSelect === nextProps.onLandmarkSelect
+  );
+});
 

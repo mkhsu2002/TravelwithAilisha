@@ -1,5 +1,7 @@
 import { UserData, TravelHistoryItem } from '../types';
 import { calculateTravelDate } from './dateUtils';
+import { StorageError } from './errorHandler';
+import { logger } from './logger';
 
 const STORAGE_KEYS = {
   USER_DATA: 'travel_ailisha_user_data',
@@ -54,10 +56,10 @@ export const saveHistory = (history: TravelHistoryItem[]): void => {
     }));
     
     localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(historyForStorage));
-  } catch (error: any) {
+  } catch (error: unknown) {
     // 如果還是超出配額，嘗試清理舊數據
-    if (error?.name === 'QuotaExceededError') {
-      console.warn('localStorage 配額超出，嘗試清理舊數據...');
+    if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+      logger.warn('localStorage 配額超出，嘗試清理舊數據', 'saveHistory');
       try {
         // 只保留最近 3 條記錄
         const recentHistory = history.slice(-3);
@@ -73,12 +75,14 @@ export const saveHistory = (history: TravelHistoryItem[]): void => {
           date: item.date,
         }));
         localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(historyForStorage));
-        console.warn('已清理舊數據，只保留最近 3 條記錄');
-      } catch (retryError) {
-        console.error('清理後仍然無法儲存:', retryError);
+        logger.warn('已清理舊數據，只保留最近 3 條記錄', 'saveHistory');
+      } catch (retryError: unknown) {
+        logger.error('清理後仍然無法儲存', 'saveHistory', retryError);
+        throw new StorageError('無法儲存歷史記錄，儲存空間不足');
       }
     } else {
-      console.error('儲存歷史記錄失敗:', error);
+      logger.error('儲存歷史記錄失敗', 'saveHistory', error);
+      throw new StorageError('儲存歷史記錄時發生錯誤');
     }
   }
 };
@@ -97,24 +101,25 @@ export const loadHistory = (): TravelHistoryItem[] => {
         item.date = calculateTravelDate(item.round);
       }
       // 向後兼容：將舊的 photoUrl 轉換為 landmarkPhotoUrl
-      if ('photoUrl' in item && !('landmarkPhotoUrl' in item)) {
-        (item as any).landmarkPhotoUrl = (item as any).photoUrl;
-        delete (item as any).photoUrl;
+      const itemRecord = item as Record<string, unknown>;
+      if ('photoUrl' in itemRecord && !('landmarkPhotoUrl' in itemRecord)) {
+        itemRecord.landmarkPhotoUrl = itemRecord.photoUrl;
+        delete itemRecord.photoUrl;
       }
       // 向後兼容：如果沒有 cityPhotoUrl，設置為空字串
-      if (!('cityPhotoUrl' in item)) {
-        (item as any).cityPhotoUrl = '';
+      if (!('cityPhotoUrl' in itemRecord)) {
+        itemRecord.cityPhotoUrl = '';
       }
       // 向後兼容：如果沒有 landmarkPhotoUrl，設置為空字串
-      if (!('landmarkPhotoUrl' in item)) {
-        (item as any).landmarkPhotoUrl = '';
+      if (!('landmarkPhotoUrl' in itemRecord)) {
+        itemRecord.landmarkPhotoUrl = '';
       }
       // 向後兼容：如果沒有 prompt 字段，設置為空字串
-      if (!('cityPhotoPrompt' in item)) {
-        (item as any).cityPhotoPrompt = '';
+      if (!('cityPhotoPrompt' in itemRecord)) {
+        itemRecord.cityPhotoPrompt = '';
       }
-      if (!('landmarkPhotoPrompt' in item)) {
-        (item as any).landmarkPhotoPrompt = '';
+      if (!('landmarkPhotoPrompt' in itemRecord)) {
+        itemRecord.landmarkPhotoPrompt = '';
       }
       return item;
     });

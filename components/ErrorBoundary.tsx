@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button } from './Button';
+import { logger } from '../utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -21,7 +22,15 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('錯誤邊界捕獲到錯誤:', error, errorInfo);
+    logger.error('錯誤邊界捕獲到錯誤', 'ErrorBoundary', { error, errorInfo });
+    
+    // 生產環境可整合錯誤追蹤服務
+    if (import.meta.env.PROD) {
+      // TODO: 整合錯誤追蹤服務（如 Sentry）
+      // errorTrackingService.captureException(error, {
+      //   contexts: { react: errorInfo }
+      // });
+    }
   }
 
   private handleReset = () => {

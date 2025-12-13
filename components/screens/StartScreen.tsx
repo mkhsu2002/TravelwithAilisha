@@ -38,9 +38,15 @@ export const StartScreen: React.FC<StartScreenProps> = ({
       // 壓縮圖片
       const compressedBase64 = await compressImage(file);
       handleImageSelected(compressedBase64);
-    } catch (err) {
+    } catch (error: unknown) {
       onError?.('圖片處理失敗，請重試');
-      console.error(err);
+      // 錯誤已通過 onError 回調處理，這裡只記錄
+      if (error instanceof Error) {
+        // 使用動態導入避免循環依賴
+        import('../../utils/logger').then(({ logger }) => {
+          logger.error('圖片處理失敗', 'StartScreen', error);
+        });
+      }
     }
   };
 

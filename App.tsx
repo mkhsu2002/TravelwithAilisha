@@ -17,6 +17,8 @@ import { SummaryScreen } from './components/screens/SummaryScreen';
 import { saveHistory, saveGameProgress, loadUserData, loadHistory, loadGameProgress } from './utils/storage';
 import { GAME_CONFIG } from './utils/constants';
 import { resetStartDate } from './utils/dateUtils';
+import { ErrorHandler } from './utils/errorHandler';
+import { logger } from './utils/logger';
 
 const App: React.FC = () => {
   const gameState = useGameState();
@@ -122,9 +124,8 @@ const App: React.FC = () => {
       const nextCities = getNextCities(round, gameState.currentLat);
       gameState.setCityOptions(nextCities);
       gameState.setGameState(GameState.CITY_SELECTION);
-    } catch (e) {
-      console.error(e);
-      showError('資料庫載入錯誤');
+    } catch (error: unknown) {
+      ErrorHandler.handle(error, 'loadCityOptionsForRound', showError);
     } finally {
       gameState.setLoading(false, '');
     }
@@ -156,9 +157,8 @@ const App: React.FC = () => {
     
     try {
       await photoGeneration.generateCityPhoto(city, tempLandmark);
-    } catch (e) {
-      console.error('生成城市照片失敗:', e);
-      showError('生成城市照片時發生錯誤，請檢查網路連線或稍後再試');
+    } catch (error: unknown) {
+      ErrorHandler.handle(error, 'handleCitySelect', showError);
     }
     
     gameState.setGameState(GameState.LANDMARK_SELECTION);
@@ -203,10 +203,11 @@ const App: React.FC = () => {
     }
   }, [gameState.selectedCity, gameState.setSelectedLandmark, gameState.setGameState, gameState.history, gameState.updateLastHistoryItem, photoGeneration, showError, handleNextRound]);
 
-  const handleDownloadItinerary = useCallback(() => {
-    if (gameState.history.length === 0) return;
+  // Memoize HTML 內容生成
+  const htmlContent = useMemo(() => {
+    if (gameState.history.length === 0) return '';
 
-    const htmlContent = `
+    return `
       <!DOCTYPE html>
       <html lang="zh-TW">
       <head>
@@ -257,6 +258,10 @@ const App: React.FC = () => {
       </body>
       </html>
     `;
+  }, [gameState.history, gameState.userData.nickname]);
+
+  const handleDownloadItinerary = useCallback(() => {
+    if (!htmlContent) return;
 
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
@@ -267,7 +272,7 @@ const App: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [gameState.history, gameState.userData.nickname]);
+  }, [htmlContent, gameState.userData.nickname]);
 
   const handleNewJourney = useCallback(() => {
     resetStartDate(); // 重置起始日期

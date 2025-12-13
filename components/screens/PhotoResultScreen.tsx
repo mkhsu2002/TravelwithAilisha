@@ -18,16 +18,15 @@ export const PhotoResultScreen: React.FC<PhotoResultScreenProps> = ({
   latestHistoryItem,
   onNextRound,
 }) => {
-  // 調試：檢查 latestHistoryItem
-  React.useEffect(() => {
-    if (latestHistoryItem) {
-      console.log('PhotoResultScreen - latestHistoryItem:', {
-        diaryEntry: latestHistoryItem.diaryEntry,
-        date: latestHistoryItem.date,
-        round: latestHistoryItem.round,
-      });
-    }
-  }, [latestHistoryItem]);
+  // 移除調試日誌，使用 logger（如需要）
+  // React.useEffect(() => {
+  //   if (latestHistoryItem) {
+  //     logger.debug('PhotoResultScreen 載入', 'PhotoResultScreen', {
+  //       round: latestHistoryItem.round,
+  //       city: latestHistoryItem.city.name,
+  //     });
+  //   }
+  // }, [latestHistoryItem]);
 
   const handleDownload = () => {
     if (!generatedPhoto) return;

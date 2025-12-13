@@ -1,39 +1,9 @@
-import { GoogleGenAI } from "@google/genai";
 import { CityVibe } from "../types";
 import { GeminiImageResponse, GeminiTextResponse } from "../types/api";
 import { loadAilishaImage } from "../utils/ailishaImage";
-
-// Initialize the client
-let aiInstance: GoogleGenAI | null = null;
-let currentApiKey: string | null = null;
-
-/**
- * 初始化或更新 AI 客戶端
- * @param apiKey - Gemini API Key
- */
-export const initializeAI = (apiKey: string): GoogleGenAI => {
-  if (!apiKey) {
-    throw new Error('API Key 未設定。請在右上角點擊「設定 API Key」進行配置。');
-  }
-
-  // 如果 API Key 改變或實例不存在，創建新實例
-  if (!aiInstance || currentApiKey !== apiKey) {
-    aiInstance = new GoogleGenAI({ apiKey });
-    currentApiKey = apiKey;
-  }
-  
-  return aiInstance;
-};
-
-/**
- * 獲取 AI 實例（需要先初始化）
- */
-const getAI = (): GoogleGenAI => {
-  if (!aiInstance) {
-    throw new Error('AI 客戶端未初始化。請先配置 API Key。');
-  }
-  return aiInstance;
-};
+import { geminiApiClient } from "./apiClient";
+import { ApiError, ErrorHandler } from "../utils/errorHandler";
+import { logger } from "../utils/logger";
 
 // --- API Functions ---
 
@@ -79,9 +49,11 @@ export const generateCityPhoto = async (
     ? ailishaImageBase64.split(',')[1]
     : ailishaImageBase64;
 
-  // 調試：確認圖片已載入
-  console.log('Ailisha 參考圖片已載入，大小:', cleanAilisha.length, 'bytes');
-  console.log('生成城市照片:', cityName, '風格:', vibe);
+  logger.debug('Ailisha 參考圖片已載入', 'generateCityPhoto', {
+    size: cleanAilisha.length,
+    city: cityName,
+    vibe,
+  });
 
   const outfitDesc = getOutfitForVibe(vibe);
 
@@ -120,14 +92,13 @@ export const generateCityPhoto = async (
   `;
 
   try {
-    const ai = getAI();
+    // 初始化 API 客戶端
+    geminiApiClient.initialize(apiKey);
     
-    // 調試：確認圖片數據
-    console.log('Ailisha 參考圖片大小:', cleanAilisha.length, 'bytes');
-    console.log('使用模型:', model);
+    logger.debug('開始生成城市照片', 'generateCityPhoto', { model, city: cityName });
     
     // Gemini API 調用：傳遞 Ailisha 參考圖和 prompt
-    const response = await ai.models.generateContent({
+    const response = await geminiApiClient.generateContent({
       model,
       contents: {
         parts: [
@@ -150,21 +121,22 @@ export const generateCityPhoto = async (
             imageSize: "1K"
         }
       }
-    }) as unknown as GeminiImageResponse;
+    }) as GeminiImageResponse;
 
     // Check for image in response
     const parts = response.candidates?.[0]?.content?.parts || [];
     for (const part of parts) {
-      if (part.inlineData) {
+      if (part.inlineData && part.inlineData.data) {
+        logger.info('城市照片生成成功', 'generateCityPhoto', { city: cityName });
         return {
           photoUrl: `data:image/png;base64,${part.inlineData.data}`,
           prompt: prompt.trim()
         };
       }
     }
-    throw new Error("No image generated");
+    throw new ApiError("API 沒有返回圖片", "NO_IMAGE_GENERATED");
   } catch (error) {
-    console.error("City photo generation failed:", error);
+    ErrorHandler.handle(error, 'generateCityPhoto');
     throw error;
   }
 };
@@ -201,8 +173,9 @@ export const generateSouvenirPhoto = async (
     ? ailishaImageBase64.split(',')[1]
     : ailishaImageBase64;
 
-  // 調試：確認圖片已載入
-  console.log('Ailisha 參考圖片已載入，大小:', cleanAilisha.length, 'bytes');
+  logger.debug('Ailisha 參考圖片已載入', 'generateSouvenirPhoto', {
+    size: cleanAilisha.length,
+  });
 
   const outfitDesc = getOutfitForVibe(vibe);
 
@@ -235,16 +208,20 @@ export const generateSouvenirPhoto = async (
   `;
 
   try {
-    const ai = getAI();
+    // 初始化 API 客戶端
+    geminiApiClient.initialize(apiKey);
     
-    // 調試：確認圖片數據
-    console.log('用戶圖片大小:', cleanUser.length, 'bytes');
-    console.log('Ailisha 參考圖片大小:', cleanAilisha.length, 'bytes');
-    console.log('使用模型:', model);
+    logger.debug('開始生成景點合照', 'generateSouvenirPhoto', {
+      model,
+      city: cityName,
+      landmark: landmarkName,
+      userImageSize: cleanUser.length,
+      ailishaImageSize: cleanAilisha.length,
+    });
     
     // Gemini API 調用：將兩個參考圖片和 prompt 一起傳遞
     // 圖片順序：Image #1 = Ailisha (右邊的人), Image #2 = User (左邊的人)
-    const response = await ai.models.generateContent({
+    const response = await geminiApiClient.generateContent({
       model,
       contents: {
         parts: [
@@ -274,28 +251,36 @@ export const generateSouvenirPhoto = async (
             imageSize: "1K"
         }
       }
-    }) as unknown as GeminiImageResponse;
+    }) as GeminiImageResponse;
 
     // Check for image in response
     const candidates = response.candidates || [];
     if (candidates.length === 0) {
-      console.error('API 響應中沒有 candidates');
-      throw new Error('API 沒有返回任何結果');
+      throw new ApiError('API 沒有返回任何結果', 'NO_CANDIDATES');
     }
 
     const candidate = candidates[0];
-    const parts = candidate?.content?.parts || [];
+    if (!candidate) {
+      throw new ApiError('API 響應格式錯誤', 'INVALID_RESPONSE');
+    }
+
+    const parts = candidate.content?.parts || [];
     
     // 檢查是否有錯誤
     if (candidate.finishReason && candidate.finishReason !== 'STOP') {
-      console.error('API 響應 finishReason:', candidate.finishReason);
-      throw new Error(`圖片生成被中斷: ${candidate.finishReason}`);
+      throw new ApiError(
+        `圖片生成被中斷: ${candidate.finishReason}`,
+        'GENERATION_INTERRUPTED'
+      );
     }
 
     // 查找圖片數據
     for (const part of parts) {
       if (part.inlineData && part.inlineData.data) {
-        console.log('成功生成圖片，大小:', part.inlineData.data.length, 'bytes');
+        logger.info('景點合照生成成功', 'generateSouvenirPhoto', {
+          landmark: landmarkName,
+          imageSize: part.inlineData.data.length,
+        });
         return {
           photoUrl: `data:image/png;base64,${part.inlineData.data}`,
           prompt: prompt.trim()
@@ -304,19 +289,10 @@ export const generateSouvenirPhoto = async (
     }
     
     // 如果沒有找到圖片
-    console.error('API 響應中沒有圖片數據');
-    console.error('Response structure:', JSON.stringify(response, null, 2));
-    throw new Error('API 響應中沒有找到圖片數據');
-  } catch (error: any) {
-    console.error("Image generation failed:", error);
-    // 提供更詳細的錯誤訊息
-    if (error?.message) {
-      throw new Error(`生成景點合照失敗: ${error.message}`);
-    }
-    if (error?.error?.message) {
-      throw new Error(`生成景點合照失敗: ${error.error.message}`);
-    }
-    throw new Error('生成景點合照時發生未知錯誤，請稍後再試');
+    throw new ApiError('API 響應中沒有找到圖片數據', 'NO_IMAGE_DATA');
+  } catch (error) {
+    ErrorHandler.handle(error, 'generateSouvenirPhoto');
+    throw error;
   }
 };
 
@@ -324,36 +300,46 @@ export const generateSouvenirPhoto = async (
  * Generate a diary entry for the completed stop
  */
 export const generateDiaryEntry = async (city: string, landmark: string, apiKey: string): Promise<string> => {
-  // 確保 AI 客戶端已初始化
-  initializeAI(apiKey);
-   const model = "gemini-2.5-flash";
-   const prompt = `
-     請用繁體中文為一張在 ${city} ${landmark} 拍攝的照片寫一段簡短、感性的社群媒體貼文。
-     提到和 Ailisha 一起旅行很有趣。
-     字數在 50 字以內。
-   `;
-   
-   const ai = getAI();
-   const response = await ai.models.generateContent({
-       model,
-       contents: prompt
-   });
-   
-   // 提取文字內容
-   let diaryText = '';
-   try {
-     // Gemini API 響應結構：response.text 或 response.candidates[0].content.parts[0].text
-     if (response.text) {
-       diaryText = response.text;
-     } else if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
-       diaryText = response.candidates[0].content.parts[0].text;
-     } else {
-       diaryText = `在 ${city} 的 ${landmark} 度過了美好的一天！`;
-     }
-   } catch (error) {
-     console.error('提取日記內容失敗:', error);
-     diaryText = `在 ${city} 的 ${landmark} 度過了美好的一天！`;
-   }
-   
-   return diaryText.trim() || `在 ${city} 的 ${landmark} 度過了美好的一天！`;
+  try {
+    // 初始化 API 客戶端
+    geminiApiClient.initialize(apiKey);
+    
+    const model = "gemini-2.5-flash";
+    const prompt = `
+      請用繁體中文為一張在 ${city} ${landmark} 拍攝的照片寫一段簡短、感性的社群媒體貼文。
+      提到和 Ailisha 一起旅行很有趣。
+      字數在 50 字以內。
+    `;
+    
+    logger.debug('開始生成日記', 'generateDiaryEntry', { city, landmark });
+    
+    const response = await geminiApiClient.generateContent({
+      model,
+      contents: prompt as unknown as { parts: Array<{ text: string }> },
+    }) as GeminiTextResponse;
+    
+    // 提取文字內容
+    let diaryText = '';
+    try {
+      // Gemini API 響應結構：response.text 或 response.candidates[0].content.parts[0].text
+      if ('text' in response && typeof response.text === 'string') {
+        diaryText = response.text;
+      } else if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
+        diaryText = response.candidates[0].content.parts[0].text;
+      } else {
+        diaryText = `在 ${city} 的 ${landmark} 度過了美好的一天！`;
+      }
+    } catch (error) {
+      logger.error('提取日記內容失敗', 'generateDiaryEntry', error);
+      diaryText = `在 ${city} 的 ${landmark} 度過了美好的一天！`;
+    }
+    
+    const result = diaryText.trim() || `在 ${city} 的 ${landmark} 度過了美好的一天！`;
+    logger.info('日記生成成功', 'generateDiaryEntry', { city, landmark });
+    return result;
+  } catch (error) {
+    ErrorHandler.handle(error, 'generateDiaryEntry');
+    // 返回預設日記內容，不中斷遊戲流程
+    return `在 ${city} 的 ${landmark} 度過了美好的一天！`;
+  }
 }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { logger } from '../../utils/logger';
 
 interface PromptModalProps {
   isOpen: boolean;
@@ -20,8 +21,8 @@ export const PromptModal: React.FC<PromptModalProps> = ({
       await navigator.clipboard.writeText(prompt);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
-      console.error('複製失敗:', error);
+    } catch (error: unknown) {
+      logger.error('複製失敗', 'PromptModal', error);
     }
   };
 
