@@ -5,7 +5,7 @@
 ## 前置需求
 
 1. Cloudflare 帳號
-2. GitHub 帳號（用於 CI/CD）
+2. GitHub 帳號（用於連接 repository）
 3. Gemini API Key（從 [Google AI Studio](https://makersuite.google.com/app/apikey) 獲取）
 
 ## 部署步驟
@@ -17,10 +17,9 @@
 1. **登入 Cloudflare Dashboard**
    - 前往 [Cloudflare Dashboard](https://dash.cloudflare.com/)
 
-2. **創建或編輯 Pages 專案**
+2. **創建 Pages 專案**
    - 點擊左側選單的 "Workers & Pages"
-   - 如果專案已存在，點擊專案名稱進入設定
-   - 如果尚未創建，點擊 "Create application" > "Pages" > "Connect to Git"
+   - 點擊 "Create application" > "Pages" > "Connect to Git"
    - 選擇您的 GitHub 倉庫 `mkhsu2002/TravelwithAilisha`
 
 3. **配置建置設定**

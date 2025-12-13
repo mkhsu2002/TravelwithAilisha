@@ -34,8 +34,6 @@ export const generateCityPhoto = async (
   vibe: CityVibe,
   apiKey: string
 ): Promise<{ photoUrl: string; prompt: string }> => {
-  // 確保 AI 客戶端已初始化
-  initializeAI(apiKey);
   const model = "gemini-3-pro-image-preview";
 
   // 載入 Ailisha 參考圖片
@@ -153,8 +151,6 @@ export const generateSouvenirPhoto = async (
   vibe: CityVibe,
   apiKey: string
 ): Promise<{ photoUrl: string; prompt: string }> => {
-  // 確保 AI 客戶端已初始化
-  initializeAI(apiKey);
   const model = "gemini-3-pro-image-preview";
 
   // Clean base64 strings
@@ -315,7 +311,9 @@ export const generateDiaryEntry = async (city: string, landmark: string, apiKey:
     
     const response = await geminiApiClient.generateContent({
       model,
-      contents: prompt as unknown as { parts: Array<{ text: string }> },
+      contents: {
+        parts: [{ text: prompt }]
+      },
     }) as GeminiTextResponse;
     
     // 提取文字內容

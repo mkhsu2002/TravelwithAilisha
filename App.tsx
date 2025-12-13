@@ -52,7 +52,7 @@ const App: React.FC = () => {
     try {
       localStorage.setItem('travel_ailisha_user_data', JSON.stringify(data));
     } catch (err) {
-      console.error('儲存用戶資料失敗:', err);
+      logger.error('儲存用戶資料失敗', 'persistUserData', err);
     }
   }, []);
 
@@ -192,9 +192,11 @@ const App: React.FC = () => {
 
       // 進入下一輪
       handleNextRound();
-    } catch (e: any) {
-      console.error('生成景點合照錯誤:', e);
-      const errorMessage = e?.message || '未知錯誤';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : '未知錯誤';
+      logger.error('生成景點合照錯誤', 'handleLandmarkSelect', error);
       showError(`生成景點合照時發生錯誤: ${errorMessage}`);
       // 確保回到景點選擇畫面，不要直接跳過
       gameState.setGameState(GameState.LANDMARK_SELECTION);
