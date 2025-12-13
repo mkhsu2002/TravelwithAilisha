@@ -1,0 +1,7 @@
+{
+  "name": "TravelwithAilisha",
+  "description": "An interactive world travel game where you travel with AI guide Ailisha, creating memories and photos along the way.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
