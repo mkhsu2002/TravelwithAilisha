@@ -17,7 +17,6 @@ import { PhotoResultScreen } from './components/screens/PhotoResultScreen';
 import { SummaryScreen } from './components/screens/SummaryScreen';
 import { saveHistory, saveGameProgress, loadUserData, loadHistory, loadGameProgress } from './utils/storage';
 import { GAME_CONFIG } from './utils/constants';
-import { ApiKeyProvider } from './contexts/ApiKeyContext';
 
 const App: React.FC = () => {
   const gameState = useGameState();
@@ -289,23 +288,21 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <ApiKeyProvider>
-        <div className="min-h-screen bg-gray-50 pb-10 font-sans">
-          <BackgroundMusic gameState={gameState.gameState} />
-          <ToastContainer toasts={toasts} onRemove={removeToast} />
-          
-          {gameState.gameState !== GameState.START && (
-            <Header
-              userData={gameState.userData}
-              currentRound={gameState.currentRound}
-            />
-          )}
-          
-          <main className="container mx-auto">
-            {renderContent()}
-          </main>
-        </div>
-      </ApiKeyProvider>
+      <div className="min-h-screen bg-gray-50 pb-10 font-sans">
+        <BackgroundMusic gameState={gameState.gameState} />
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
+        
+        {gameState.gameState !== GameState.START && (
+          <Header
+            userData={gameState.userData}
+            currentRound={gameState.currentRound}
+          />
+        )}
+        
+        <main className="container mx-auto">
+          {renderContent()}
+        </main>
+      </div>
     </ErrorBoundary>
   );
 };
