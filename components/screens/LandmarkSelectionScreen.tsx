@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Landmark } from '../../types';
+import { PromptModal } from '../PromptModal';
 
 interface LandmarkSelectionScreenProps {
   cityIntro: string;
   cityPhotoUrl: string | null;
+  cityPhotoPrompt: string | null;
   landmarkOptions: Landmark[];
   onLandmarkSelect: (landmark: Landmark) => void;
 }
@@ -11,20 +13,35 @@ interface LandmarkSelectionScreenProps {
 export const LandmarkSelectionScreen: React.FC<LandmarkSelectionScreenProps> = ({
   cityIntro,
   cityPhotoUrl,
+  cityPhotoPrompt,
   landmarkOptions,
   onLandmarkSelect,
 }) => {
+  const [promptModalOpen, setPromptModalOpen] = useState(false);
+
   return (
     <div className="pb-32 max-w-lg mx-auto">
       {/* 城市照片主視覺 (9:16 比例) */}
       {cityPhotoUrl ? (
-        <div className="w-full mb-6">
+        <div className="w-full mb-6 relative group">
           <img
             src={cityPhotoUrl}
             alt="Ailisha 在城市中"
             className="w-full object-cover"
             style={{ aspectRatio: '9/16' }}
           />
+          {cityPhotoPrompt && (
+            <button
+              onClick={() => setPromptModalOpen(true)}
+              className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+              aria-label="查看提示詞"
+              title="查看提示詞"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          )}
         </div>
       ) : (
         <div className="w-full mb-6 bg-gray-200 flex items-center justify-center" style={{ aspectRatio: '9/16' }}>
@@ -76,6 +93,15 @@ export const LandmarkSelectionScreen: React.FC<LandmarkSelectionScreenProps> = (
           ))}
         </div>
       </div>
+
+      {cityPhotoPrompt && (
+        <PromptModal
+          isOpen={promptModalOpen}
+          onClose={() => setPromptModalOpen(false)}
+          prompt={cityPhotoPrompt}
+          title="城市照片提示詞"
+        />
+      )}
     </div>
   );
 };

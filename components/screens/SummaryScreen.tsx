@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TravelHistoryItem, UserData } from '../../types';
 import { Button } from '../Button';
+import { PromptModal } from '../PromptModal';
 
 interface SummaryScreenProps {
   userData: UserData;
@@ -15,6 +16,20 @@ export const SummaryScreen: React.FC<SummaryScreenProps> = ({
   onDownloadItinerary,
   onNewJourney,
 }) => {
+  const [promptModal, setPromptModal] = useState<{ isOpen: boolean; prompt: string; title: string }>({
+    isOpen: false,
+    prompt: '',
+    title: '',
+  });
+
+  const openPromptModal = (prompt: string, title: string) => {
+    setPromptModal({ isOpen: true, prompt, title });
+  };
+
+  const closePromptModal = () => {
+    setPromptModal({ isOpen: false, prompt: '', title: '' });
+  };
+
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <div className="text-center mb-12 mt-8">
@@ -36,21 +51,45 @@ export const SummaryScreen: React.FC<SummaryScreenProps> = ({
             
             <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-5 rounded-2xl shadow-lg border border-gray-50 hover:-translate-y-1 transition-transform duration-300">
               {/* 城市照片 */}
-              <div className="mb-3 rounded-xl overflow-hidden shadow-inner" style={{ aspectRatio: '9/16' }}>
+              <div className="mb-3 rounded-xl overflow-hidden shadow-inner relative group" style={{ aspectRatio: '9/16' }}>
                 <img
                   src={item.cityPhotoUrl}
                   alt={`Ailisha 在 ${item.city.name}`}
                   className="w-full h-full object-cover"
                 />
+                {item.cityPhotoPrompt && (
+                  <button
+                    onClick={() => openPromptModal(item.cityPhotoPrompt, `城市照片提示詞 - ${item.city.name}`)}
+                    className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                    aria-label="查看提示詞"
+                    title="查看提示詞"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </button>
+                )}
               </div>
               {/* 景點合照 */}
               {item.landmarkPhotoUrl && (
-                <div className="mb-4 rounded-xl overflow-hidden shadow-inner" style={{ aspectRatio: '1/1' }}>
+                <div className="mb-4 rounded-xl overflow-hidden shadow-inner relative group" style={{ aspectRatio: '1/1' }}>
                   <img
                     src={item.landmarkPhotoUrl}
                     alt={`與 Ailisha 在 ${item.landmark.name}`}
                     className="w-full h-full object-cover"
                   />
+                  {item.landmarkPhotoPrompt && (
+                    <button
+                      onClick={() => openPromptModal(item.landmarkPhotoPrompt, `景點合照提示詞 - ${item.landmark.name}`)}
+                      className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                      aria-label="查看提示詞"
+                      title="查看提示詞"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               )}
               <h3 className="font-bold text-xl text-gray-800 mb-1">
@@ -84,6 +123,13 @@ export const SummaryScreen: React.FC<SummaryScreenProps> = ({
           🔄 開始新的旅程
         </Button>
       </div>
+
+      <PromptModal
+        isOpen={promptModal.isOpen}
+        onClose={closePromptModal}
+        prompt={promptModal.prompt}
+        title={promptModal.title}
+      />
     </div>
   );
 };

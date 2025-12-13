@@ -23,6 +23,7 @@ export const useGameState = () => {
   const [cityIntro, setCityIntro] = useState<string>('');
   const [generatedPhoto, setGeneratedPhoto] = useState<string | null>(null);
   const [cityPhotoUrl, setCityPhotoUrl] = useState<string | null>(null);
+  const [cityPhotoPrompt, setCityPhotoPrompt] = useState<string | null>(null);
   
   const [loadingState, setLoadingState] = useState<LoadingState>({
     isLoading: false,
@@ -72,6 +73,7 @@ export const useGameState = () => {
     setCityIntro('');
     setGeneratedPhoto(null);
     setCityPhotoUrl(null);
+    setCityPhotoPrompt(null);
     setLoadingState({ isLoading: false, message: '' });
   }, []);
 
@@ -106,6 +108,8 @@ export const useGameState = () => {
     setGeneratedPhoto,
     cityPhotoUrl,
     setCityPhotoUrl,
+    cityPhotoPrompt,
+    setCityPhotoPrompt,
     loadingState,
     
     // Actions

@@ -56,13 +56,14 @@ const getOutfitForVibe = (vibe: CityVibe): string => {
 
 /**
  * Generates a city photo of Ailisha exploring the city (9:16 aspect ratio)
+ * Returns both the photo URL and the prompt used
  */
 export const generateCityPhoto = async (
   cityName: string,
   cityDescription: string,
   vibe: CityVibe,
   apiKey: string
-): Promise<string> => {
+): Promise<{ photoUrl: string; prompt: string }> => {
   // 確保 AI 客戶端已初始化
   initializeAI(apiKey);
   const model = "gemini-3-pro-image-preview";
@@ -152,7 +153,10 @@ export const generateCityPhoto = async (
     const parts = response.candidates?.[0]?.content?.parts || [];
     for (const part of parts) {
       if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
+        return {
+          photoUrl: `data:image/png;base64,${part.inlineData.data}`,
+          prompt: prompt.trim()
+        };
       }
     }
     throw new Error("No image generated");
@@ -164,6 +168,7 @@ export const generateCityPhoto = async (
 
 /**
  * Generates the souvenir photo using gemini-3-pro-image-preview
+ * Returns both the photo URL and the prompt used
  */
 export const generateSouvenirPhoto = async (
   userSelfieBase64: string,
@@ -172,7 +177,7 @@ export const generateSouvenirPhoto = async (
   landmarkDesc: string,
   vibe: CityVibe,
   apiKey: string
-): Promise<string> => {
+): Promise<{ photoUrl: string; prompt: string }> => {
   // 確保 AI 客戶端已初始化
   initializeAI(apiKey);
   const model = "gemini-3-pro-image-preview";
@@ -271,13 +276,24 @@ export const generateSouvenirPhoto = async (
     const parts = response.candidates?.[0]?.content?.parts || [];
     for (const part of parts) {
       if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
+        return {
+          photoUrl: `data:image/png;base64,${part.inlineData.data}`,
+          prompt: prompt.trim()
+        };
       }
     }
-    throw new Error("No image generated");
-  } catch (error) {
+    
+    // 如果沒有找到圖片，檢查是否有錯誤訊息
+    const errorMessage = response.candidates?.[0]?.finishReason || 'Unknown error';
+    console.error('API 響應中沒有圖片，finishReason:', errorMessage);
+    throw new Error(`無法生成圖片: ${errorMessage}`);
+  } catch (error: any) {
     console.error("Image generation failed:", error);
-    throw error;
+    // 提供更詳細的錯誤訊息
+    if (error?.message) {
+      throw new Error(`生成景點合照失敗: ${error.message}`);
+    }
+    throw new Error('生成景點合照時發生未知錯誤，請稍後再試');
   }
 };
 

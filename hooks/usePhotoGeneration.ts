@@ -35,7 +35,7 @@ export const usePhotoGeneration = ({
 
     try {
       // 1. 生成城市照片（Ailisha 在城市中）
-      const cityPhotoUrl = await generateCityPhoto(
+      const cityPhotoResult = await generateCityPhoto(
         city.name,
         city.description,
         city.vibe,
@@ -53,8 +53,10 @@ export const usePhotoGeneration = ({
         round: currentRound,
         city,
         landmark,
-        cityPhotoUrl,
+        cityPhotoUrl: cityPhotoResult.photoUrl,
+        cityPhotoPrompt: cityPhotoResult.prompt,
         landmarkPhotoUrl: '', // 稍後選擇景點時會生成
+        landmarkPhotoPrompt: '', // 稍後選擇景點時會生成
         diaryEntry: diary,
         date: dateString,
       };
@@ -72,7 +74,7 @@ export const usePhotoGeneration = ({
   const generateLandmarkPhoto = useCallback(async (
     city: City,
     landmark: Landmark
-  ): Promise<string> => {
+  ): Promise<{ photoUrl: string; prompt: string }> => {
     if (!userSelfieBase64) {
       throw new Error('缺少玩家自拍照');
     }
@@ -85,7 +87,7 @@ export const usePhotoGeneration = ({
 
     try {
       // 生成景點合照（玩家與 Ailisha）
-      const landmarkPhotoUrl = await generateSouvenirPhoto(
+      const landmarkPhotoResult = await generateSouvenirPhoto(
         userSelfieBase64,
         city.name,
         landmark.name,
@@ -94,7 +96,7 @@ export const usePhotoGeneration = ({
         apiKey
       );
 
-      return landmarkPhotoUrl;
+      return landmarkPhotoResult;
     } catch (error) {
       console.error('生成景點合照失敗:', error);
       throw error;

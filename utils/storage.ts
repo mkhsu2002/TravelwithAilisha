@@ -70,6 +70,13 @@ export const loadHistory = (): TravelHistoryItem[] => {
       if (!('landmarkPhotoUrl' in item)) {
         (item as any).landmarkPhotoUrl = '';
       }
+      // 向後兼容：如果沒有 prompt 字段，設置為空字串
+      if (!('cityPhotoPrompt' in item)) {
+        (item as any).cityPhotoPrompt = '';
+      }
+      if (!('landmarkPhotoPrompt' in item)) {
+        (item as any).landmarkPhotoPrompt = '';
+      }
       return item;
     });
   } catch (error) {

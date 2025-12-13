@@ -89,8 +89,9 @@ const App: React.FC = () => {
     onSuccess: (entry) => {
       // 添加到歷史記錄
       gameState.addHistoryItem(entry);
-      // 設置城市照片 URL
+      // 設置城市照片 URL 和 Prompt
       gameState.setCityPhotoUrl(entry.cityPhotoUrl);
+      gameState.setCityPhotoPrompt(entry.cityPhotoPrompt);
     },
     onLoadingChange: gameState.setLoading,
   });
@@ -166,7 +167,7 @@ const App: React.FC = () => {
 
     try {
       // 生成景點合照
-      const landmarkPhotoUrl = await photoGeneration.generateLandmarkPhoto(
+      const landmarkPhotoResult = await photoGeneration.generateLandmarkPhoto(
         gameState.selectedCity,
         landmark
       );
@@ -178,16 +179,18 @@ const App: React.FC = () => {
           // 更新最後一筆記錄的 landmark 和合照
           gameState.updateLastHistoryItem({ 
             landmark,
-            landmarkPhotoUrl 
+            landmarkPhotoUrl: landmarkPhotoResult.photoUrl,
+            landmarkPhotoPrompt: landmarkPhotoResult.prompt
           });
         }
       }
 
       // 進入下一輪
       handleNextRound();
-    } catch (e) {
-      console.error(e);
-      showError('生成景點合照時發生錯誤，請檢查網路連線或稍後再試');
+    } catch (e: any) {
+      console.error('生成景點合照錯誤:', e);
+      const errorMessage = e?.message || '未知錯誤';
+      showError(`生成景點合照時發生錯誤: ${errorMessage}`);
       gameState.setGameState(GameState.LANDMARK_SELECTION);
     }
   }, [gameState.selectedCity, gameState.setSelectedLandmark, gameState.setGameState, gameState.history, gameState.updateLastHistoryItem, photoGeneration, showError, handleNextRound]);
@@ -305,6 +308,7 @@ const App: React.FC = () => {
           <LandmarkSelectionScreen
             cityIntro={gameState.cityIntro}
             cityPhotoUrl={gameState.cityPhotoUrl}
+            cityPhotoPrompt={gameState.cityPhotoPrompt}
             landmarkOptions={gameState.landmarkOptions}
             onLandmarkSelect={handleLandmarkSelect}
           />
