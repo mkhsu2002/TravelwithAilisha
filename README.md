@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://www.facebook.com/ailisha0501/" target="_blank" rel="noopener noreferrer">
-  <img width="1200" height="800" alt="Ailisha in London" src="assets/Ailisha_London.jpg" style="border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
+  <img width="466" height="600" alt="Ailisha in London" src="assets/Ailisha_London.jpg" style="border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
 </a>
 
 **點擊圖片前往 [Ailisha 的 Facebook](https://www.facebook.com/ailisha0501/)**
@@ -142,31 +142,6 @@
 ### 匯出遊記
 
 完成旅程後，點擊「下載遊記」按鈕即可下載包含所有照片和日記的 HTML 檔案。
-
-## 🌿 分支管理
-
-本專案使用以下分支策略：
-
-- **`main`** - 主分支，包含最新的穩定代碼
-- **`stable/v1.0`** - v1.0 穩定版本分支，用於生產環境部署
-- **`dev/v1.1`** - v1.1 開發分支，用於新功能開發和測試
-
-## 📦 部署
-
-本專案已配置為使用 Cloudflare Pages 進行自動部署。詳細部署說明請參考 [DEPLOYMENT.md](./DEPLOYMENT.md)
-
-### 部署分支
-
-- **生產環境**: 從 `stable/v1.0` 分支部署
-- **預覽環境**: 從 `dev/v1.1` 分支部署
-
-### 快速部署步驟
-
-1. **使用 Cloudflare Dashboard（推薦）**
-   - 連接 GitHub 倉庫 `mkhsu2002/TravelwithAilisha`
-   - 設置建置命令：`npm run build`
-   - 設置輸出目錄：`dist`
-   - 添加環境變數：`VITE_GEMINI_API_KEY`
 
 ## 🎯 專案特色與優化
 
