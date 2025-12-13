@@ -17,7 +17,14 @@ export interface GeminiImageResponse {
 }
 
 export interface GeminiTextResponse {
-  text: string;
+  text?: string;
+  candidates?: Array<{
+    content: {
+      parts: Array<{
+        text?: string;
+      }>;
+    };
+  }>;
 }
 
 export interface GeminiError {
@@ -25,4 +32,3 @@ export interface GeminiError {
   message: string;
   status: string;
 }
-

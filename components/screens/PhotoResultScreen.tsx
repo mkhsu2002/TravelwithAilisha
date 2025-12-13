@@ -18,6 +18,17 @@ export const PhotoResultScreen: React.FC<PhotoResultScreenProps> = ({
   latestHistoryItem,
   onNextRound,
 }) => {
+  // 調試：檢查 latestHistoryItem
+  React.useEffect(() => {
+    if (latestHistoryItem) {
+      console.log('PhotoResultScreen - latestHistoryItem:', {
+        diaryEntry: latestHistoryItem.diaryEntry,
+        date: latestHistoryItem.date,
+        round: latestHistoryItem.round,
+      });
+    }
+  }, [latestHistoryItem]);
+
   const handleDownload = () => {
     if (!generatedPhoto) return;
     
@@ -40,9 +51,13 @@ export const PhotoResultScreen: React.FC<PhotoResultScreenProps> = ({
           </div>
         )}
         <div className="mt-5 px-3 pb-3">
-          {latestHistoryItem?.diaryEntry && (
+          {latestHistoryItem?.diaryEntry ? (
             <p className="font-handwriting text-gray-700 text-center text-lg italic leading-relaxed mb-4">
               "{latestHistoryItem.diaryEntry}"
+            </p>
+          ) : (
+            <p className="text-gray-500 text-center text-sm mb-4">
+              日記生成中...
             </p>
           )}
           <div className="flex justify-between items-center mt-4 border-t border-gray-100 pt-3">
@@ -50,7 +65,7 @@ export const PhotoResultScreen: React.FC<PhotoResultScreenProps> = ({
               {selectedCity?.name}
             </span>
             <span className="text-xs text-gray-400">
-              {latestHistoryItem?.date || new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '/')}
+              {latestHistoryItem?.date || '載入中...'}
             </span>
           </div>
         </div>

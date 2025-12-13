@@ -4,9 +4,8 @@ export const AILISHA_ROLE = "您的 AI 導遊";
 export const TOTAL_ROUNDS = 6;
 export const STARTING_CITY = "台北 101";
 
-// Using a placeholder that matches the vibe (Asian female traveler) for the avatar icon.
-// The actual generation will use the detailed description from your uploaded photo.
-export const AILISHA_AVATAR_URL = "https://images.unsplash.com/photo-1528812702330-f4cc1454c540?q=80&w=1000&auto=format&fit=crop";
+// Ailisha 頭像使用本地圖片
+export const AILISHA_AVATAR_URL = '/assets/Ailisha.jpg';
 
 export const AILISHA_SYSTEM_INSTRUCTION = `
 你是一位名叫 Ailisha (艾莉莎) 的導遊，個性開朗、充滿活力且知識淵博。

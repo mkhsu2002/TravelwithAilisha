@@ -17,6 +17,7 @@ import { PhotoResultScreen } from './components/screens/PhotoResultScreen';
 import { SummaryScreen } from './components/screens/SummaryScreen';
 import { saveHistory, saveGameProgress, loadUserData, loadHistory, loadGameProgress } from './utils/storage';
 import { GAME_CONFIG } from './utils/constants';
+import { resetStartDate } from './utils/dateUtils';
 
 const App: React.FC = () => {
   const gameState = useGameState();
@@ -87,6 +88,9 @@ const App: React.FC = () => {
     userSelfieBase64: gameState.userData.selfieBase64,
     currentRound: gameState.currentRound,
     onSuccess: (entry) => {
+      // 先添加到歷史記錄
+      gameState.addHistoryItem(entry);
+      // 然後設置照片和狀態
       gameState.setGeneratedPhoto(entry.photoUrl);
       gameState.setGameState(GameState.PHOTO_RESULT);
     },
@@ -218,6 +222,7 @@ const App: React.FC = () => {
   }, [gameState.history, gameState.userData.nickname]);
 
   const handleNewJourney = useCallback(() => {
+    resetStartDate(); // 重置起始日期
     gameState.resetGame();
     window.location.reload();
   }, [gameState]);

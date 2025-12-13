@@ -1,4 +1,5 @@
 import { UserData, TravelHistoryItem } from '../types';
+import { calculateTravelDate } from './dateUtils';
 
 const STORAGE_KEYS = {
   USER_DATA: 'travel_ailisha_user_data',
@@ -54,11 +55,7 @@ export const loadHistory = (): TravelHistoryItem[] => {
     // 向後兼容：為沒有日期的舊記錄生成日期
     return history.map((item: TravelHistoryItem) => {
       if (!item.date) {
-        const baseDate = new Date();
-        const daysToAdd = (item.round - 1) * 14; // 每站間隔兩週
-        const travelDate = new Date(baseDate);
-        travelDate.setDate(baseDate.getDate() + daysToAdd);
-        item.date = `${travelDate.getFullYear()}/${String(travelDate.getMonth() + 1).padStart(2, '0')}/${String(travelDate.getDate()).padStart(2, '0')}`;
+        item.date = calculateTravelDate(item.round);
       }
       return item;
     });

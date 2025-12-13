@@ -1,6 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { CityVibe } from "../types";
 import { GeminiImageResponse, GeminiTextResponse } from "../types/api";
+import { loadAilishaImage } from "../utils/ailishaImage";
 
 // Initialize the client
 let aiInstance: GoogleGenAI | null = null;
@@ -73,18 +74,24 @@ export const generateSouvenirPhoto = async (
     ? userSelfieBase64.split(',')[1] 
     : userSelfieBase64;
 
+  // 載入 Ailisha 參考圖片
+  const ailishaImageBase64 = await loadAilishaImage();
+  const cleanAilisha = ailishaImageBase64.includes(',')
+    ? ailishaImageBase64.split(',')[1]
+    : ailishaImageBase64;
+
   const outfitDesc = getOutfitForVibe(vibe);
 
   // UPDATED PROMPT: 
-  // 1. Stronger face consistency instruction.
+  // 1. Use Ailisha reference image for face consistency.
   // 2. Dynamic outfit based on location vibe.
   const prompt = `
     Generate a realistic, high-quality wide-angle travel selfie of two people standing in front of the famous ${landmarkName} in ${cityName}.
     
-    Person 1 (Left): Matches the facial features, hair, and gender of the person in the provided reference image (User). They are smiling at the camera.
+    Person 1 (Left): Matches the facial features, hair, and gender of the person in the first reference image (User). They are smiling at the camera.
     
     Person 2 (Right): This is Ailisha. 
-    **Face**: She MUST look like a specific Asian female influencer. She has long, dark, wavy hair (volume), soft almond-shaped eyes, a delicate nose, and a radiant, photogenic smile. She has a slender, fit physique.
+    **Face**: She MUST match the facial features, appearance, and look exactly like the person in the second reference image. Maintain complete facial consistency with the reference photo.
     **Outfit**: She is wearing ${outfitDesc}.
     **Pose**: She is standing close to Person 1, looking energetic and friendly, maybe making a peace sign or pointing at the landmark.
     
@@ -99,6 +106,7 @@ export const generateSouvenirPhoto = async (
       contents: {
         parts: [
           { inlineData: { mimeType: "image/jpeg", data: cleanUser } },
+          { inlineData: { mimeType: "image/jpeg", data: cleanAilisha } },
           { text: prompt }
         ]
       },
@@ -141,7 +149,23 @@ export const generateDiaryEntry = async (city: string, landmark: string, apiKey:
    const response = await ai.models.generateContent({
        model,
        contents: prompt
-   }) as unknown as GeminiTextResponse;
+   });
    
-   return response.text || `在 ${city} 的 ${landmark} 度過了美好的一天！`;
+   // 提取文字內容
+   let diaryText = '';
+   try {
+     // Gemini API 響應結構：response.text 或 response.candidates[0].content.parts[0].text
+     if (response.text) {
+       diaryText = response.text;
+     } else if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
+       diaryText = response.candidates[0].content.parts[0].text;
+     } else {
+       diaryText = `在 ${city} 的 ${landmark} 度過了美好的一天！`;
+     }
+   } catch (error) {
+     console.error('提取日記內容失敗:', error);
+     diaryText = `在 ${city} 的 ${landmark} 度過了美好的一天！`;
+   }
+   
+   return diaryText.trim() || `在 ${city} 的 ${landmark} 度過了美好的一天！`;
 }
