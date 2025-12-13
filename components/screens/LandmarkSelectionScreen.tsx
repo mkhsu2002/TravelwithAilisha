@@ -20,56 +20,70 @@ const LandmarkSelectionScreenComponent: React.FC<LandmarkSelectionScreenProps> =
   const [promptModalOpen, setPromptModalOpen] = useState(false);
 
   return (
-    <div className="px-4 sm:px-6 pb-24 sm:pb-32 max-w-lg mx-auto">
+    <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
       {/* 城市照片主視覺 (9:16 比例) */}
       {cityPhotoUrl ? (
-        <div className="w-full mb-4 sm:mb-6 relative group rounded-xl sm:rounded-2xl overflow-hidden shadow-lg">
-          <img
-            src={cityPhotoUrl}
-            alt="Ailisha 在城市中"
-            className="w-full h-auto object-cover"
-            style={{ aspectRatio: '9/16' }}
-            loading="lazy"
-            decoding="async"
-          />
+        <div className="w-full mb-6 sm:mb-8 relative group animate-fade-in">
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white ring-4 ring-pink-100">
+            <img
+              src={cityPhotoUrl}
+              alt="Ailisha 在城市中"
+              className="w-full object-cover"
+              style={{ aspectRatio: '9/16' }}
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          </div>
           {cityPhotoPrompt && (
             <button
               onClick={() => setPromptModalOpen(true)}
-              className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white p-2 rounded-lg transition-all shadow-lg"
+              className="absolute top-4 right-4 bg-black/80 hover:bg-black/95 backdrop-blur-sm text-white p-3 rounded-xl transition-all shadow-xl hover:scale-110 z-10"
               aria-label="查看提示詞"
               title="查看提示詞"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>
           )}
         </div>
       ) : (
-        <div className="w-full mb-4 sm:mb-6 bg-gray-200 flex items-center justify-center rounded-xl sm:rounded-2xl" style={{ aspectRatio: '9/16' }}>
-          <p className="text-gray-500 text-sm sm:text-base">照片生成中...</p>
+        <div className="w-full mb-6 sm:mb-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center shadow-lg border-4 border-white" style={{ aspectRatio: '9/16' }}>
+          <div className="text-center">
+            <div className="animate-spin text-4xl mb-3">✈️</div>
+            <p className="text-gray-600 font-medium">照片生成中...</p>
+          </div>
         </div>
       )}
 
       {/* 城市介紹 */}
-      <div className="mb-4 sm:mb-6">
-        <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100">
-          <p className="text-sm sm:text-base text-gray-800 leading-relaxed text-center">{cityIntro}</p>
+      <div className="mb-6 sm:mb-8 animate-slide-up">
+        <div className="bg-white/90 backdrop-blur-lg p-6 sm:p-8 rounded-3xl shadow-xl border border-pink-100/50">
+          <div className="flex items-start gap-4">
+            <div className="text-3xl flex-shrink-0">🗺️</div>
+            <p className="text-base sm:text-lg text-gray-800 leading-relaxed flex-1">
+              {cityIntro}
+            </p>
+          </div>
         </div>
       </div>
 
       {/* 景點選項 */}
-      <div>
-        <p className="text-center text-xs sm:text-sm font-bold text-gray-500 mb-3 sm:mb-4 px-2">
-          ✨ 我挑了三個最棒的景點，選一個吧！ ✨
-        </p>
+      <div className="animate-fade-in">
+        <div className="text-center mb-6 sm:mb-8">
+          <p className="text-base sm:text-lg font-bold text-gray-700 bg-gradient-to-r from-pink-100 to-purple-100 px-6 py-3 rounded-full inline-block">
+            ✨ 我挑了三個最棒的景點，選一個吧！ ✨
+          </p>
+        </div>
         
-        <div className="grid grid-cols-1 gap-3 sm:gap-4" role="list">
+        <div className="grid grid-cols-1 gap-5 sm:gap-6" role="list">
           {landmarkOptions.map((landmark, idx) => (
             <button
               key={`${landmark.name}-${idx}`}
               onClick={() => onLandmarkSelect(landmark)}
-              className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-md hover:shadow-xl transition-all cursor-pointer border border-transparent hover:border-pink-300 text-left group w-full"
+              className="card card-hover p-6 sm:p-8 text-left group relative overflow-hidden"
+              style={{ animationDelay: `${idx * 0.1}s` }}
               role="listitem"
               tabIndex={0}
               onKeyDown={(e) => {
@@ -80,16 +94,26 @@ const LandmarkSelectionScreenComponent: React.FC<LandmarkSelectionScreenProps> =
               }}
               aria-label={`選擇 ${landmark.name}`}
             >
-              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2 group-hover:text-pink-600 transition-colors">
-                {landmark.name}
-              </h3>
-              <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-3">
-                {landmark.description}
-              </p>
-              <div className="flex justify-end">
-                <span className="bg-pink-100 text-pink-600 px-4 py-2 rounded-full font-bold text-sm group-hover:bg-pink-600 group-hover:text-white transition-colors">
-                  選擇 &rarr;
-                </span>
+              {/* 背景裝飾 */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-400 via-rose-400 to-purple-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+              <div className="absolute top-4 right-4 text-4xl opacity-5 group-hover:opacity-10 transition-opacity">📍</div>
+              
+              {/* 內容 */}
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-3">
+                  <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900 group-hover:text-pink-600 transition-colors flex-1">
+                    {landmark.name}
+                  </h3>
+                  <span className="ml-4 text-2xl sm:text-3xl opacity-20 group-hover:opacity-40 transition-opacity">🏛️</span>
+                </div>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-5 pr-8">
+                  {landmark.description}
+                </p>
+                <div className="flex justify-end">
+                  <span className="bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700 px-6 py-3 rounded-full font-bold text-sm sm:text-base group-hover:from-pink-600 group-hover:to-purple-600 group-hover:text-white transition-all duration-300 shadow-md group-hover:shadow-lg">
+                    選擇 &rarr;
+                  </span>
+                </div>
               </div>
             </button>
           ))}

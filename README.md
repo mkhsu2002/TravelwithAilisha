@@ -284,6 +284,9 @@ npm run test:coverage
 
 本專案採用 [MIT License](LICENSE) 授權。
 
+- [英文版本](LICENSE) - MIT License (English)
+- [繁體中文版本](LICENSE.zh-TW.md) - MIT 授權條款 (繁體中文)
+
 ## 🙏 致謝
 
 - [Google Gemini API](https://ai.google.dev/) - AI 圖片生成服務

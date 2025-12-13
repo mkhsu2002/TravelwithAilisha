@@ -7,18 +7,36 @@ interface LoadingScreenProps {
 export const LoadingScreen: React.FC<LoadingScreenProps> = ({ message }) => {
   return (
     <div
-      className="fixed inset-0 bg-white/90 backdrop-blur-md z-50 flex flex-col items-center justify-center p-4 sm:p-6 text-center"
+      className="fixed inset-0 bg-gradient-to-br from-pink-50/95 via-white/95 to-purple-50/95 backdrop-blur-lg z-50 flex flex-col items-center justify-center p-6 text-center"
       role="status"
       aria-live="polite"
       aria-label="載入中"
     >
-      <div className="w-20 h-20 sm:w-24 sm:h-24 mb-6 sm:mb-8 relative">
-        <div className="absolute inset-0 border-3 sm:border-4 border-gray-100 rounded-full" aria-hidden="true"></div>
-        <div className="absolute inset-0 border-3 sm:border-4 border-pink-500 rounded-full border-t-transparent animate-spin" aria-hidden="true"></div>
-        <div className="absolute inset-0 flex items-center justify-center text-2xl sm:text-3xl" aria-hidden="true">✈️</div>
+      <div className="max-w-md mx-auto space-y-6 animate-fade-in">
+        {/* 載入動畫 */}
+        <div className="relative mx-auto w-28 h-28 sm:w-32 sm:h-32">
+          <div className="absolute inset-0 border-4 border-pink-100 rounded-full" aria-hidden="true"></div>
+          <div className="absolute inset-0 border-4 border-pink-500 rounded-full border-t-transparent animate-spin" aria-hidden="true"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-4xl sm:text-5xl animate-bounce" aria-hidden="true">✈️</span>
+          </div>
+        </div>
+        
+        {/* 文字內容 */}
+        <div className="space-y-3">
+          <h3 className="text-2xl sm:text-3xl font-extrabold text-gray-900">請稍候...</h3>
+          <p className="text-base sm:text-lg text-gray-600 animate-pulse font-medium px-4">
+            {message || '處理中...'}
+          </p>
+        </div>
+        
+        {/* 進度點 */}
+        <div className="flex justify-center gap-2 pt-4">
+          <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+          <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+        </div>
       </div>
-      <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2 sm:mb-3">請稍候...</h3>
-      <p className="text-sm sm:text-base text-gray-500 animate-pulse font-medium px-4">{message}</p>
     </div>
   );
 };

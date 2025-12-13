@@ -4,7 +4,7 @@ import { AILISHA_NAME, STARTING_CITY, TOTAL_ROUNDS } from './constants';
 import { getRandomElements, getNextCities } from './utils/travelLogic';
 import { useGameState } from './hooks/useGameState';
 import { usePhotoGeneration } from './hooks/usePhotoGeneration';
-import { useToast, ToastContainer } from './components/Toast';
+import { useToast, ToastContainer, ToastType } from './components/Toast';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Header } from './components/Header';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -22,7 +22,25 @@ import { logger } from './utils/logger';
 
 const App: React.FC = () => {
   const gameState = useGameState();
-  const { toasts, removeToast, error: showError } = useToast();
+  const { toasts, removeToast, error: showErrorToast, success: showSuccessToast, info: showInfoToast, warning: showWarningToast } = useToast();
+  
+  // 適配函數：將 ToastType 轉換為對應的 Toast 調用
+  const showError = useCallback((message: string, type: ToastType = 'error') => {
+    switch (type) {
+      case 'error':
+        showErrorToast(message);
+        break;
+      case 'success':
+        showSuccessToast(message);
+        break;
+      case 'info':
+        showInfoToast(message);
+        break;
+      case 'warning':
+        showWarningToast(message);
+        break;
+    }
+  }, [showErrorToast, showSuccessToast, showInfoToast, showWarningToast]);
 
   // 載入儲存的資料（僅在首次載入時）
   useEffect(() => {
@@ -52,7 +70,7 @@ const App: React.FC = () => {
     try {
       localStorage.setItem('travel_ailisha_user_data', JSON.stringify(data));
     } catch (err) {
-      logger.error('儲存用戶資料失敗', 'persistUserData', err);
+      console.error('儲存用戶資料失敗:', err);
     }
   }, []);
 
@@ -192,11 +210,9 @@ const App: React.FC = () => {
 
       // 進入下一輪
       handleNextRound();
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : '未知錯誤';
-      logger.error('生成景點合照錯誤', 'handleLandmarkSelect', error);
+    } catch (e: any) {
+      console.error('生成景點合照錯誤:', e);
+      const errorMessage = e?.message || '未知錯誤';
       showError(`生成景點合照時發生錯誤: ${errorMessage}`);
       // 確保回到景點選擇畫面，不要直接跳過
       gameState.setGameState(GameState.LANDMARK_SELECTION);
@@ -349,7 +365,7 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50 font-sans">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 font-sans">
         <BackgroundMusic gameState={gameState.gameState} />
         <ToastContainer toasts={toasts} onRemove={removeToast} />
         
@@ -360,7 +376,7 @@ const App: React.FC = () => {
           />
         )}
         
-        <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12">
+        <main className="w-full">
           {renderContent()}
         </main>
       </div>

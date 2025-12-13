@@ -18,7 +18,7 @@ export const saveUserData = (userData: UserData): void => {
   try {
     localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData));
   } catch (error) {
-    logger.error('儲存用戶資料失敗', 'saveUserData', error);
+    console.error('儲存用戶資料失敗:', error);
   }
 };
 
@@ -30,7 +30,7 @@ export const loadUserData = (): UserData | null => {
     const data = localStorage.getItem(STORAGE_KEYS.USER_DATA);
     return data ? JSON.parse(data) : null;
   } catch (error) {
-    logger.error('讀取用戶資料失敗', 'loadUserData', error);
+    console.error('讀取用戶資料失敗:', error);
     return null;
   }
 };
@@ -124,7 +124,7 @@ export const loadHistory = (): TravelHistoryItem[] => {
       return item;
     });
   } catch (error) {
-    logger.error('讀取歷史記錄失敗', 'loadHistory', error);
+    console.error('讀取歷史記錄失敗:', error);
     return [];
   }
 };
@@ -142,7 +142,7 @@ export const saveGameProgress = (data: {
     localStorage.setItem(STORAGE_KEYS.CURRENT_LAT, String(data.currentLat));
     localStorage.setItem(STORAGE_KEYS.CURRENT_LOCATION, data.currentLocation);
   } catch (error) {
-    logger.error('儲存遊戲進度失敗', 'saveGameProgress', error);
+    console.error('儲存遊戲進度失敗:', error);
   }
 };
 
@@ -168,7 +168,7 @@ export const loadGameProgress = (): {
     }
     return null;
   } catch (error) {
-    logger.error('讀取遊戲進度失敗', 'loadGameProgress', error);
+    console.error('讀取遊戲進度失敗:', error);
     return null;
   }
 };
@@ -182,7 +182,7 @@ export const clearAllData = (): void => {
       localStorage.removeItem(key);
     });
   } catch (error) {
-    logger.error('清除資料失敗', 'clearAllData', error);
+    console.error('清除資料失敗:', error);
   }
 };
 
