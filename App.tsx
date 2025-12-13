@@ -32,7 +32,7 @@ const App: React.FC = () => {
       gameState.setUserData(savedUserData);
     }
 
-    if (savedHistory.length > 0) {
+    if (savedHistory && Array.isArray(savedHistory) && savedHistory.length > 0) {
       // 直接設置歷史記錄，而不是逐個添加
       savedHistory.forEach(item => gameState.addHistoryItem(item));
     }
@@ -45,12 +45,21 @@ const App: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 確保在任何環境都能安全保存用戶資料，避免 ReferenceError
+  const persistUserData = useCallback((data: typeof gameState.userData) => {
+    try {
+      localStorage.setItem('travel_ailisha_user_data', JSON.stringify(data));
+    } catch (err) {
+      console.error('儲存用戶資料失敗:', err);
+    }
+  }, []);
+
   // 儲存資料到 localStorage
   useEffect(() => {
     if (gameState.userData.selfieBase64) {
-      saveUserData(gameState.userData);
+      persistUserData(gameState.userData);
     }
-  }, [gameState.userData]);
+  }, [gameState.userData, persistUserData]);
 
   useEffect(() => {
     if (gameState.history.length > 0) {
