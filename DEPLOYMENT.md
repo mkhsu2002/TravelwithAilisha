@@ -2,6 +2,8 @@
 
 本專案已配置為使用 Cloudflare Pages 進行自動部署。
 
+> **重要說明**：本專案**不使用 GitHub Actions**，而是直接透過 Cloudflare Dashboard 連接 GitHub repository 進行自動部署。所有建置和部署流程都由 Cloudflare Pages 自動處理。
+
 ## 前置需求
 
 1. Cloudflare 帳號
@@ -10,9 +12,9 @@
 
 ## 部署步驟
 
-### 方法一：使用 Cloudflare Dashboard（推薦）
+### 方法一：使用 Cloudflare Dashboard（推薦，自動部署）
 
-本專案使用 Cloudflare Dashboard 直接連接 GitHub 進行自動部署。
+本專案使用 Cloudflare Dashboard 直接連接 GitHub 進行自動部署。**不需要配置 GitHub Actions**，所有部署流程由 Cloudflare 自動處理。
 
 1. **登入 Cloudflare Dashboard**
    - 前往 [Cloudflare Dashboard](https://dash.cloudflare.com/)
@@ -26,6 +28,7 @@
    - Build command: `npm run build`
    - Build output directory: `dist`
    - Root directory: `/`（留空）
+   - Node.js version: `20`（Cloudflare 會自動偵測，或手動設定）
 
 4. **設置生產分支（重要）**
    - 在專案設定的 "Builds & deployments" 區塊
@@ -43,12 +46,14 @@
    - 點擊 "Save and Deploy"
    - Cloudflare 會自動建置並部署您的應用
 
-7. **自動部署**
+7. **自動部署（無需 GitHub Actions）**
+   - Cloudflare Pages 會自動監聽 GitHub repository 的推送事件
    - 之後每次推送代碼到 `main` 分支時，Cloudflare 會自動：
-     1. 偵測到推送事件
-     2. 安裝依賴
-     3. 執行建置
+     1. 偵測到 GitHub 推送事件（透過 Cloudflare 的 Git 整合）
+     2. 自動安裝依賴（`npm install`）
+     3. 執行建置命令（`npm run build`）
      4. 部署到生產環境
+   - **不需要配置 GitHub Actions**，所有流程由 Cloudflare 自動處理
 
 ### 方法二：使用 Wrangler CLI（手動部署）
 
@@ -133,12 +138,24 @@
 2. **檢查網路連線**
    - 確認 Cloudflare Pages 可以訪問 Google API
 
-## 持續部署
+## 持續部署（自動化，無需 GitHub Actions）
 
-當您推送代碼到 `main` 分支時，Cloudflare 會自動：
-1. 偵測到推送事件
-2. 執行建置
-3. 部署到 Cloudflare Pages
+### 自動部署流程
+
+當您推送代碼到 `main` 分支時，Cloudflare Pages 會自動：
+1. **偵測推送事件**：Cloudflare 透過 Git 整合自動偵測 GitHub repository 的推送
+2. **觸發建置**：自動開始建置流程
+3. **執行建置**：執行 `npm run build` 命令
+4. **部署應用**：自動部署到 Cloudflare Pages
+
+### 重要說明
+
+- ✅ **不需要 GitHub Actions**：所有部署流程由 Cloudflare Pages 自動處理
+- ✅ **自動觸發**：每次推送到 `main` 分支都會自動觸發部署
+- ✅ **預覽部署**：推送到其他分支會自動創建預覽部署
+- ✅ **建置日誌**：可在 Cloudflare Dashboard 查看完整的建置和部署日誌
+
+### 手動觸發部署
 
 您也可以手動觸發部署：
 - 在 Cloudflare Dashboard 的專案頁面點擊 "Retry deployment" 或 "Redeploy"

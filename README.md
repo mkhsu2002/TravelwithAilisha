@@ -1,5 +1,10 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+
+<a href="https://www.facebook.com/ailisha0501/" target="_blank" rel="noopener noreferrer">
+  <img width="1200" height="800" alt="Ailisha in London" src="assets/Ailisha_London.jpg" style="border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />
+</a>
+
+**點擊圖片前往 [Ailisha 的 Facebook](https://www.facebook.com/ailisha0501/)**
 
 # 與 Ailisha 艾莉莎環遊世界
 
