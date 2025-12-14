@@ -47,30 +47,30 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center justify-center py-8 px-4 sm:px-6 lg:px-8 bg-white">
-      <div className="w-full max-w-md mx-auto space-y-6 animate-fade-in">
+    <div className="w-full min-h-screen flex flex-col items-center justify-center py-8 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="w-full max-w-lg mx-auto space-y-8 animate-fade-in">
         {/* 標題區域 */}
         <div className="text-center space-y-4">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight">
-            與 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600">Ailisha</span> 一起環遊世界
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight">
+            與 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600">Ailisha</span> 一起環遊世界
           </h1>
-          <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+          <p className="text-lg sm:text-xl text-gray-600 leading-relaxed px-4">
             嗨！我是 <span className="font-bold text-pink-600">Ailisha 艾莉莎</span>
             <br />
-            上傳一張自拍，我們馬上從 <span className="font-bold text-gray-800">台北 101</span> 出發！ 🌍 ✨
+            上傳一張自拍，我們馬上從 <span className="font-bold text-gray-800 bg-pink-50 px-2 py-1 rounded-md">台北 101</span> 出發！ 🌍 ✨
           </p>
         </div>
 
         {/* 表單卡片 */}
-        <div className="w-full space-y-5 bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+        <div className="w-full space-y-6 bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-gray-100">
           <div>
-            <label htmlFor="nickname" className="block text-sm font-bold text-gray-700 mb-2">
+            <label htmlFor="nickname" className="block text-sm font-bold text-gray-700 mb-3">
               您的暱稱
             </label>
             <input
               id="nickname"
               type="text"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none text-gray-800 font-medium placeholder-gray-400 transition-all"
+              className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-pink-100 focus:border-pink-400 outline-none text-gray-800 font-medium placeholder-gray-400 transition-all hover:border-pink-300"
               placeholder="例如：冒險家小明"
               value={userData.nickname}
               onChange={(e) => onUserDataChange({ ...userData, nickname: e.target.value })}
@@ -79,28 +79,20 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           </div>
           
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">
+            <label className="block text-sm font-bold text-gray-700 mb-3">
               您的自拍照
             </label>
-            <PhotoUpload onImageSelected={handleImageSelected} onFileChange={handleFileChange} />
+            <PhotoUpload 
+              onImageSelected={handleImageSelected} 
+              onFileChange={handleFileChange}
+              previewImage={userData.selfieBase64}
+            />
           </div>
-          
-          {userData.selfieBase64 && (
-            <div className="flex justify-center">
-              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-pink-200 shadow-md">
-                <img 
-                  src={userData.selfieBase64} 
-                  className="w-full h-full object-cover" 
-                  alt="預覽" 
-                />
-              </div>
-            </div>
-          )}
 
           <Button
             disabled={!userData.nickname || !userData.selfieBase64}
             onClick={handleStart}
-            className="text-lg py-4 w-full"
+            className="text-lg sm:text-xl py-4 w-full mt-2"
             aria-label="開始旅程"
           >
             出發去旅行！ ✈️
