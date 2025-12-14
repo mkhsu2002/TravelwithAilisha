@@ -35,7 +35,7 @@ export const generateCityPhoto = async (
   apiKey: string
 ): Promise<{ photoUrl: string; prompt: string }> => {
   // 確保 AI 客戶端已初始化
-  initializeAI(apiKey);
+  geminiApiClient.initialize(apiKey);
   const model = "gemini-3-pro-image-preview";
 
   // 載入 Ailisha 參考圖片
@@ -92,9 +92,6 @@ export const generateCityPhoto = async (
   `;
 
   try {
-    // 初始化 API 客戶端
-    geminiApiClient.initialize(apiKey);
-    
     logger.debug('開始生成城市照片', 'generateCityPhoto', { model, city: cityName });
     
     // Gemini API 調用：傳遞 Ailisha 參考圖和 prompt
@@ -154,7 +151,7 @@ export const generateSouvenirPhoto = async (
   apiKey: string
 ): Promise<{ photoUrl: string; prompt: string }> => {
   // 確保 AI 客戶端已初始化
-  initializeAI(apiKey);
+  geminiApiClient.initialize(apiKey);
   const model = "gemini-3-pro-image-preview";
 
   // Clean base64 strings
@@ -208,9 +205,6 @@ export const generateSouvenirPhoto = async (
   `;
 
   try {
-    // 初始化 API 客戶端
-    geminiApiClient.initialize(apiKey);
-    
     logger.debug('開始生成景點合照', 'generateSouvenirPhoto', {
       model,
       city: cityName,
@@ -301,9 +295,7 @@ export const generateSouvenirPhoto = async (
  */
 export const generateDiaryEntry = async (city: string, landmark: string, apiKey: string): Promise<string> => {
   try {
-    // 初始化 API 客戶端
     geminiApiClient.initialize(apiKey);
-    
     const model = "gemini-2.5-flash";
     const prompt = `
       請用繁體中文為一張在 ${city} ${landmark} 拍攝的照片寫一段簡短、感性的社群媒體貼文。

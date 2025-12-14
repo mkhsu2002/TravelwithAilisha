@@ -10,6 +10,7 @@ type MusicMode = 'ACTIVE' | 'CALM';
 export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ gameState }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [manualStyle, setManualStyle] = useState<MusicMode | null>(null);
   
   // Refs to hold audio context and nodes so they persist across renders
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -17,8 +18,13 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ gameState }) =
   const ambienceGainRef = useRef<GainNode | null>(null);
   const schedulerTimeoutRef = useRef<number | null>(null);
   
-  // Determine mode based on game state
+  // Determine mode based on game state or user selection
   const getMode = (state: GameState): MusicMode => {
+    // 如果用戶手動選擇了音樂風格，優先使用用戶選擇
+    if (manualStyle) {
+      return manualStyle;
+    }
+    // 否則根據遊戲狀態自動選擇
     switch (state) {
       case GameState.CITY_SELECTION:
       case GameState.LANDMARK_SELECTION:
@@ -33,8 +39,12 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ gameState }) =
 
   useEffect(() => {
     modeRef.current = mode;
-    // Transition effect could go here (e.g. slight volume dip)
-  }, [mode]);
+    // 當模式改變時，重新調度音符以應用新風格
+    if (isPlaying && !isMuted && schedulerTimeoutRef.current) {
+      clearTimeout(schedulerTimeoutRef.current);
+      scheduleNote();
+    }
+  }, [mode, isPlaying, isMuted]);
 
   useEffect(() => {
     // Cleanup on unmount
@@ -90,6 +100,22 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ gameState }) =
         masterGainRef.current.gain.setTargetAtTime(0, audioCtxRef.current.currentTime, 0.1);
       }
       setIsMuted(true);
+    }
+  };
+
+  const toggleMusicStyle = () => {
+    // 隨機切換音樂風格
+    const styles: MusicMode[] = ['ACTIVE', 'CALM'];
+    const currentStyle = manualStyle || mode;
+    const availableStyles = styles.filter(s => s !== currentStyle);
+    const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)] || styles[Math.floor(Math.random() * styles.length)];
+    
+    setManualStyle(newStyle);
+    
+    // 如果正在播放，重新調度音符以應用新風格
+    if (isPlaying && !isMuted && schedulerTimeoutRef.current) {
+      clearTimeout(schedulerTimeoutRef.current);
+      scheduleNote();
     }
   };
 
@@ -195,7 +221,22 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ gameState }) =
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 items-end">
+      {/* 音樂風格切換按鈕 */}
+      {isPlaying && !isMuted && (
+        <button
+          onClick={toggleMusicStyle}
+          className="flex items-center gap-2 px-3 py-2 rounded-full shadow-lg backdrop-blur-md transition-all duration-300 bg-white/80 text-pink-600 border border-pink-200 hover:bg-pink-50"
+          title={`切換到${musicStyle === 'ACTIVE' ? '平靜' : '活躍'}風格`}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span className="text-xs font-medium">{mode === 'ACTIVE' ? '活躍' : '平靜'}</span>
+        </button>
+      )}
+      
+      {/* 播放/靜音按鈕 */}
       <button 
         onClick={toggleMute}
         className={`
