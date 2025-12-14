@@ -67,12 +67,11 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ gameState }) =
 
     // Master Gain (Volume Control)
     const masterGain = ctx.createGain();
-    masterGain.gain.value = 0.3; // Default low volume
+    masterGain.gain.value = 0.25; // 稍微降低音量，讓音樂更舒適
     masterGain.connect(ctx.destination);
     masterGainRef.current = masterGain;
 
-    // Start Engines
-    startAmbience(ctx, masterGain);
+    // Start Music Generation
     scheduleNote();
     
     setIsPlaying(true);
@@ -91,7 +90,7 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ gameState }) =
     if (isMuted) {
       // Unmute
       if (masterGainRef.current) {
-        masterGainRef.current.gain.setTargetAtTime(0.3, audioCtxRef.current.currentTime, 0.1);
+        masterGainRef.current.gain.setTargetAtTime(0.25, audioCtxRef.current.currentTime, 0.1);
       }
       setIsMuted(false);
     } else {
@@ -119,105 +118,113 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({ gameState }) =
     }
   };
 
-  // --- Generative Audio Logic ---
+  // --- Improved Generative Audio Logic ---
 
-  // 1. Ambience: Filtered White Noise (Wind/Ocean effect)
-  const startAmbience = (ctx: AudioContext, output: AudioNode) => {
-    const bufferSize = ctx.sampleRate * 2; // 2 seconds buffer
-    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
+  // 創建更自然的音色（使用多個振盪器組合）
+  const createTone = (ctx: AudioContext, freq: number, type: 'warm' | 'bright'): OscillatorNode => {
+    const osc = ctx.createOscillator();
     
-    // Fill with noise
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = Math.random() * 2 - 1;
+    if (type === 'warm') {
+      // 溫暖的音色：使用正弦波 + 低八度
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+    } else {
+      // 明亮的音色：使用三角波
+      osc.type = 'triangle';
+      osc.frequency.value = freq;
     }
-
-    const noise = ctx.createBufferSource();
-    noise.buffer = buffer;
-    noise.loop = true;
-
-    // Filter to make it sound like wind/ocean
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 400;
-
-    // LFO to modulate filter (Wind breeze effect)
-    const lfo = ctx.createOscillator();
-    lfo.type = 'sine';
-    lfo.frequency.value = 0.1; // Very slow modulation
-    const lfoGain = ctx.createGain();
-    lfoGain.gain.value = 300; // Modulation depth
-
-    lfo.connect(lfoGain);
-    lfoGain.connect(filter.frequency);
     
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.value = 0.15; // Background level
-    ambienceGainRef.current = noiseGain;
-
-    noise.connect(filter);
-    filter.connect(noiseGain);
-    noiseGain.connect(output);
-
-    noise.start();
-    lfo.start();
+    return osc;
   };
 
-  // 2. Melody: Procedural Notes
+  // 播放和弦（多個音符同時播放）
+  const playChord = (ctx: AudioContext, frequencies: number[], duration: number, gain: number, type: 'warm' | 'bright') => {
+    const now = ctx.currentTime;
+    const attack = 0.1;
+    const release = 0.3;
+    
+    frequencies.forEach((freq, index) => {
+      const osc = createTone(ctx, freq, type);
+      const gainNode = ctx.createGain();
+      
+      // 稍微錯開音符開始時間，讓和弦更自然
+      const startTime = now + (index * 0.02);
+      
+      gainNode.gain.setValueAtTime(0, startTime);
+      gainNode.gain.linearRampToValueAtTime(gain * (0.7 + Math.random() * 0.3), startTime + attack);
+      gainNode.gain.setTargetAtTime(0, startTime + duration - release, release / 3);
+      
+      osc.connect(gainNode);
+      gainNode.connect(masterGainRef.current!);
+      
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    });
+  };
+
+  // 播放單個音符（用於旋律）
+  const playNote = (ctx: AudioContext, freq: number, duration: number, gain: number, type: 'warm' | 'bright') => {
+    const now = ctx.currentTime;
+    const attack = 0.15;
+    const release = 0.2;
+    
+    const osc = createTone(ctx, freq, type);
+    const gainNode = ctx.createGain();
+    
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(gain, now + attack);
+    gainNode.gain.setTargetAtTime(0, now + duration - release, release / 3);
+    
+    osc.connect(gainNode);
+    gainNode.connect(masterGainRef.current!);
+    
+    osc.start(now);
+    osc.stop(now + duration);
+  };
+
+  // 改進的音樂生成邏輯
   const scheduleNote = () => {
     if (!audioCtxRef.current || !masterGainRef.current) return;
     const ctx = audioCtxRef.current;
-    
     const currentMode = modeRef.current;
 
-    // Config based on mode
-    // Active: Higher pitch, faster, triangle wave (brighter)
-    // Calm: Lower pitch, slower, sine wave (softer)
-    const config = currentMode === 'ACTIVE' 
-      ? {
-          scale: [523.25, 587.33, 659.25, 783.99, 880.00], // C Major Pentatonic (C5 octave)
-          wave: 'triangle' as OscillatorType,
-          minInterval: 400,
-          maxInterval: 1200,
-          duration: 1.5,
-          gain: 0.1
-        }
-      : {
-          scale: [261.63, 293.66, 329.63, 392.00, 440.00, 196.00], // C Major Pentatonic (C4 octave + G3)
-          wave: 'sine' as OscillatorType,
-          minInterval: 2000,
-          maxInterval: 4000,
-          duration: 3,
-          gain: 0.15
-        };
-
-    // Pick random note
-    const noteFreq = config.scale[Math.floor(Math.random() * config.scale.length)];
-    
-    // Play Note
-    const osc = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    
-    osc.type = config.wave;
-    osc.frequency.value = noteFreq;
-    
-    // Envelope (Attack -> Decay)
-    const now = ctx.currentTime;
-    const attack = currentMode === 'ACTIVE' ? 0.05 : 0.5;
-    
-    gainNode.gain.setValueAtTime(0, now);
-    gainNode.gain.linearRampToValueAtTime(config.gain, now + attack);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + config.duration);
-    
-    osc.connect(gainNode);
-    gainNode.connect(masterGainRef.current);
-    
-    osc.start(now);
-    osc.stop(now + config.duration);
-
-    // Schedule next
-    const nextTime = Math.random() * (config.maxInterval - config.minInterval) + config.minInterval;
-    schedulerTimeoutRef.current = window.setTimeout(scheduleNote, nextTime);
+    if (currentMode === 'ACTIVE') {
+      // 活躍模式：更快的節奏，明亮的音色
+      const majorScale = [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77]; // C Major (C5-D5-E5-F5-G5-A5-B5)
+      
+      // 偶爾播放和弦
+      if (Math.random() < 0.3) {
+        // C Major 和弦：C-E-G
+        const chordFreqs = [523.25, 659.25, 783.99];
+        playChord(ctx, chordFreqs, 1.2, 0.08, 'bright');
+      } else {
+        // 播放單個音符，使用更流暢的旋律
+        const noteIndex = Math.floor(Math.random() * majorScale.length);
+        playNote(ctx, majorScale[noteIndex], 0.8, 0.12, 'bright');
+      }
+      
+      // 下一個音符：較快節奏
+      const nextTime = 600 + Math.random() * 800; // 0.6-1.4秒
+      schedulerTimeoutRef.current = window.setTimeout(scheduleNote, nextTime);
+    } else {
+      // 平靜模式：緩慢的節奏，溫暖的音色
+      const pentatonicScale = [261.63, 293.66, 329.63, 392.00, 440.00]; // C Major Pentatonic (C4-D4-E4-G4-A4)
+      
+      // 更常播放和弦，創造和諧感
+      if (Math.random() < 0.5) {
+        // C Major 和弦的低音版本：C-E-G
+        const chordFreqs = [261.63, 329.63, 392.00];
+        playChord(ctx, chordFreqs, 2.5, 0.1, 'warm');
+      } else {
+        // 播放單個音符
+        const noteIndex = Math.floor(Math.random() * pentatonicScale.length);
+        playNote(ctx, pentatonicScale[noteIndex], 2.0, 0.12, 'warm');
+      }
+      
+      // 下一個音符：較慢節奏
+      const nextTime = 2500 + Math.random() * 2000; // 2.5-4.5秒
+      schedulerTimeoutRef.current = window.setTimeout(scheduleNote, nextTime);
+    }
   };
 
   return (
