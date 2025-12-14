@@ -14,6 +14,7 @@ import { IntroScreen } from './components/screens/IntroScreen';
 import { CitySelectionScreen } from './components/screens/CitySelectionScreen';
 import { LandmarkSelectionScreen } from './components/screens/LandmarkSelectionScreen';
 import { SummaryScreen } from './components/screens/SummaryScreen';
+import { PhotoResultScreen } from './components/screens/PhotoResultScreen';
 import { saveHistory, saveGameProgress, loadUserData, loadHistory, loadGameProgress } from './utils/storage';
 import { GAME_CONFIG } from './utils/constants';
 import { resetStartDate } from './utils/dateUtils';
@@ -209,8 +210,8 @@ const App: React.FC = () => {
         }
       }
 
-      // 進入下一輪
-      handleNextRound();
+      // 顯示合照檢視畫面，而不是直接進入下一輪
+      gameState.setGameState(GameState.PHOTO_RESULT);
     } catch (e: any) {
       console.error('生成景點合照錯誤:', e);
       const errorMessage = e?.message || '未知錯誤';
@@ -348,6 +349,17 @@ const App: React.FC = () => {
       
       case GameState.PHOTO_GENERATION:
         return <LoadingScreen message={gameState.loadingState.message} />;
+      
+      case GameState.PHOTO_RESULT:
+        return (
+          <PhotoResultScreen
+            currentRound={gameState.currentRound}
+            selectedCity={gameState.selectedCity}
+            generatedPhoto={latestHistoryItem?.landmarkPhotoUrl || null}
+            latestHistoryItem={latestHistoryItem}
+            onNextRound={handleNextRound}
+          />
+        );
       
       case GameState.SUMMARY:
         return (

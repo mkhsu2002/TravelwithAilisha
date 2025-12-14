@@ -154,7 +154,7 @@ export const generateSouvenirPhoto = async (
   geminiApiClient.initialize(apiKey);
   const model = "gemini-3-pro-image-preview";
 
-  // Clean base64 string
+  // Clean base64 strings
   const cleanUser = userSelfieBase64.includes(',') 
     ? userSelfieBase64.split(',')[1] 
     : userSelfieBase64;
@@ -163,41 +163,69 @@ export const generateSouvenirPhoto = async (
     throw new Error('用戶自拍照無效');
   }
 
+  // 載入 Ailisha 參考圖片
+  const ailishaImageBase64 = await loadAilishaImage();
+  
+  if (!ailishaImageBase64) {
+    throw new Error('無法載入 Ailisha 參考圖片');
+  }
+  
+  const cleanAilisha = ailishaImageBase64.includes(',')
+    ? ailishaImageBase64.split(',')[1]
+    : ailishaImageBase64;
+
   logger.debug('開始生成景點合照', 'generateSouvenirPhoto', {
     model,
     city: cityName,
     landmark: landmarkName,
     userImageSize: cleanUser.length,
+    ailishaImageSize: cleanAilisha.length,
   });
 
-  // 簡化的提示詞：只針對玩家拍照
+  const outfitDesc = getOutfitForVibe(vibe);
+
+  // 強化的提示詞：Ailisha 與玩家兩人合照（繁體中文）
   const prompt = `
-    You are given a reference image of a person. Use this reference image to generate a realistic, high-quality travel selfie photograph.
+    你被提供了兩張參考圖片，按照以下順序：
+    1. 第一張圖片（Image #1）：這是 AILISHA - 用於右邊的人
+    2. 第二張圖片（Image #2）：這是玩家（USER）- 用於左邊的人
     
-    CRITICAL REQUIREMENTS:
-    - The person in the photo MUST look EXACTLY like the person in the reference image
-    - Same face shape, eyes, nose, mouth, hair, skin tone, and overall appearance
-    - DO NOT create a different face. It MUST be an exact match to the reference image
+    生成一張真實、高品質的寬角旅行自拍照片，照片中有兩個人一起站在 ${cityName} 的著名地標 "${landmarkName}" 前。
     
-    Photo Details:
-    - Location: ${landmarkName} in ${cityName}
-    - Description: ${landmarkDesc}
-    - Pose: The person is taking a selfie, smiling happily at the camera
-    - Expression: Natural, happy, excited about visiting this landmark
-    - Background: Clearly show ${landmarkName} in the background. The landmark should be recognizable and prominent
+    === 右邊的人（使用 Image #1 - AILISHA）===
+    關鍵要求：這個人必須看起來完全像 Image #1 中的 Ailisha。
+    - 臉部：完全複製 Image #1 的臉部 - 相同的臉型、眼睛、鼻子、嘴巴、髮型、膚色
+    - 不要創建不同的臉部。必須是 Image #1 臉部的完全複製品
+    - 服裝：${outfitDesc}（服裝可以改變，但臉部必須與 Image #1 完全相同）
+    - 姿勢：站在左邊的人旁邊，看起來充滿活力和友善，可能比出勝利手勢或指向地標
+    - 位置：照片的右側
     
-    Style: Professional travel photography, vibrant colors, natural lighting, Instagram-worthy selfie, square format (1:1 aspect ratio), 4k resolution
+    === 左邊的人（使用 Image #2 - 玩家）===
+    - 臉部：匹配 Image #2 中的人物 - 相同的面部特徵、髮型和性別
+    - 他們正對著鏡頭微笑
+    - 位置：照片的左側
     
-    MOST IMPORTANT: The person's face must be pixel-perfect identical to the reference image.
+    背景：清楚地顯示 ${landmarkName}，${landmarkDesc}。地標應該清晰可辨且突出。
+    
+    風格：專業旅行攝影，鮮豔色彩，自然光線，網紅自拍風格，4K 解析度，正方形格式（1:1 比例）。
+    
+    絕對優先：右邊的人必須擁有與 Image #1（Ailisha）完全一致的臉部。這是最關鍵的要求。
   `;
 
   try {
-    // Gemini API 調用：只傳遞用戶自拍和 prompt
+    // Gemini API 調用：傳遞兩張參考圖片和 prompt
     const response = await geminiApiClient.generateContent({
       model,
       contents: {
         parts: [
-          // 用戶自拍參考圖
+          // Image #1: Ailisha 參考圖（右邊的人）
+          { 
+            inlineData: { 
+              mimeType: "image/jpeg", 
+              data: cleanAilisha 
+            } 
+          },
+          // Image #2: 用戶自拍（左邊的人）
           { 
             inlineData: { 
               mimeType: "image/jpeg", 
