@@ -36,7 +36,7 @@ export const generateCityPhoto = async (
 ): Promise<{ photoUrl: string; prompt: string }> => {
   // 確保 AI 客戶端已初始化
   geminiApiClient.initialize(apiKey);
-  const model = "gemini-2.5-flash";
+  const model = "gemini-2.5-flash-image";
 
   // 載入 Ailisha 參考圖片
   const ailishaImageBase64 = await loadAilishaImage();
@@ -114,13 +114,31 @@ export const generateCityPhoto = async (
       },
       config: {
         imageConfig: {
+            aspectRatio: "9:16",
             imageSize: "1K"
         }
       }
     }) as GeminiImageResponse;
 
+    // 調試：記錄完整響應結構
+    logger.debug('API 響應結構', 'generateCityPhoto', {
+      hasCandidates: !!response.candidates,
+      candidatesLength: response.candidates?.length || 0,
+      responseKeys: Object.keys(response),
+      fullResponse: JSON.stringify(response).substring(0, 500), // 只記錄前500字符
+    });
+
     // Check for image in response
     const parts = response.candidates?.[0]?.content?.parts || [];
+    logger.debug('解析 parts', 'generateCityPhoto', {
+      partsLength: parts.length,
+      partsTypes: parts.map(p => ({
+        hasInlineData: !!p.inlineData,
+        hasText: !!p.text,
+        inlineDataKeys: p.inlineData ? Object.keys(p.inlineData) : [],
+      })),
+    });
+
     for (const part of parts) {
       if (part.inlineData && part.inlineData.data) {
         logger.info('城市照片生成成功', 'generateCityPhoto', { city: cityName });
@@ -130,6 +148,12 @@ export const generateCityPhoto = async (
         };
       }
     }
+    
+    // 如果沒有找到圖片，記錄詳細錯誤信息
+    logger.error('API 沒有返回圖片', 'generateCityPhoto', {
+      response: JSON.stringify(response).substring(0, 1000),
+      parts: parts,
+    });
     throw new ApiError("API 沒有返回圖片", "NO_IMAGE_GENERATED");
   } catch (error) {
     ErrorHandler.handle(error, 'generateCityPhoto');
@@ -151,7 +175,7 @@ export const generateSouvenirPhoto = async (
   apiKey: string
 ): Promise<{ photoUrl: string; prompt: string }> => {
   geminiApiClient.initialize(apiKey);
-  const model = "gemini-2.5-flash";
+  const model = "gemini-2.5-flash-image";
 
   // Clean base64 strings
   const cleanUser = userSelfieBase64.includes(',') 
@@ -239,6 +263,7 @@ export const generateSouvenirPhoto = async (
       },
       config: {
         imageConfig: {
+            aspectRatio: "1:1",
             imageSize: "1K"
         }
       }
