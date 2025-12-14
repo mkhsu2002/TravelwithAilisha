@@ -47,11 +47,11 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center justify-center py-8 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: '#f9fafb' }}>
-      <div className="w-full max-w-lg mx-auto space-y-8">
+    <div className="w-full min-h-screen flex flex-col items-center justify-center py-8 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="w-full max-w-lg mx-auto space-y-8 animate-fade-in">
         {/* 標題區域 */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight">
+        <div className="text-center space-y-5">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 tracking-tight leading-tight">
             與 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600">Ailisha</span> 一起環遊世界
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 leading-relaxed px-4">
@@ -62,7 +62,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         </div>
 
         {/* 表單卡片 */}
-        <div className="w-full space-y-6 bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-gray-100">
+        <div className="w-full space-y-6 bg-white p-8 sm:p-10 rounded-3xl shadow-2xl border border-gray-100">
           <div>
             <label htmlFor="nickname" className="block text-sm font-bold text-gray-700 mb-3">
               您的暱稱
