@@ -8,7 +8,7 @@ import { logger } from '../utils/logger';
 const API_CONFIG = {
   MAX_RETRIES: 3,
   RETRY_DELAY: 1000,
-  TIMEOUT: 30000,
+  TIMEOUT: 60000, // 增加超時時間到60秒，因為圖片生成需要更長時間
 } as const;
 
 /**

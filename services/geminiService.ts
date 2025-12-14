@@ -140,6 +140,7 @@ export const generateCityPhoto = async (
 
 /**
  * Generates the souvenir photo using gemini-3-pro-image-preview
+ * Simplified version: Only generates photo of the user at the landmark
  * Returns both the photo URL and the prompt used
  */
 export const generateSouvenirPhoto = async (
@@ -150,90 +151,60 @@ export const generateSouvenirPhoto = async (
   vibe: CityVibe,
   apiKey: string
 ): Promise<{ photoUrl: string; prompt: string }> => {
-  // 確保 AI 客戶端已初始化
   geminiApiClient.initialize(apiKey);
   const model = "gemini-3-pro-image-preview";
 
-  // Clean base64 strings
+  // Clean base64 string
   const cleanUser = userSelfieBase64.includes(',') 
     ? userSelfieBase64.split(',')[1] 
     : userSelfieBase64;
 
-  // 載入 Ailisha 參考圖片
-  const ailishaImageBase64 = await loadAilishaImage();
-  
-  if (!ailishaImageBase64) {
-    throw new Error('無法載入 Ailisha 參考圖片');
+  if (!cleanUser) {
+    throw new Error('用戶自拍照無效');
   }
-  
-  const cleanAilisha = ailishaImageBase64.includes(',')
-    ? ailishaImageBase64.split(',')[1]
-    : ailishaImageBase64;
 
-  logger.debug('Ailisha 參考圖片已載入', 'generateSouvenirPhoto', {
-    size: cleanAilisha.length,
+  logger.debug('開始生成景點合照', 'generateSouvenirPhoto', {
+    model,
+    city: cityName,
+    landmark: landmarkName,
+    userImageSize: cleanUser.length,
   });
 
-  const outfitDesc = getOutfitForVibe(vibe);
-
-  // 改進的 PROMPT: 明確指出圖片順序和對應關係
+  // 簡化的提示詞：只針對玩家拍照
   const prompt = `
-    IMPORTANT: You are given TWO reference images in this exact order:
-    1. FIRST image (Image #1): This is AILISHA - use this for the person on the RIGHT
-    2. SECOND image (Image #2): This is the USER - use this for the person on the LEFT
+    You are given a reference image of a person. Use this reference image to generate a realistic, high-quality travel selfie photograph.
     
-    Generate a realistic, high-quality wide-angle travel selfie photograph of two people standing together in front of the famous landmark "${landmarkName}" in ${cityName}.
+    CRITICAL REQUIREMENTS:
+    - The person in the photo MUST look EXACTLY like the person in the reference image
+    - Same face shape, eyes, nose, mouth, hair, skin tone, and overall appearance
+    - DO NOT create a different face. It MUST be an exact match to the reference image
     
-    === PERSON ON THE RIGHT (Use Image #1 - AILISHA) ===
-    CRITICAL: This person MUST look EXACTLY like the person in Image #1 (Ailisha).
-    - Face: Copy Image #1's face EXACTLY - same face shape, eyes, nose, mouth, hair, skin tone
-    - DO NOT create a different face. It MUST be an exact replica of Image #1's face.
-    - Outfit: ${outfitDesc} (clothing can change, but face must be IDENTICAL to Image #1)
-    - Pose: Standing close to the person on the left, looking energetic and friendly, maybe making a peace sign or pointing at the landmark
-    - Position: On the RIGHT side of the photo
+    Photo Details:
+    - Location: ${landmarkName} in ${cityName}
+    - Description: ${landmarkDesc}
+    - Pose: The person is taking a selfie, smiling happily at the camera
+    - Expression: Natural, happy, excited about visiting this landmark
+    - Background: Clearly show ${landmarkName} in the background. The landmark should be recognizable and prominent
     
-    === PERSON ON THE LEFT (Use Image #2 - USER) ===
-    - Face: Match the person in Image #2 (User) - same facial features, hair, and gender
-    - They are smiling at the camera
-    - Position: On the LEFT side of the photo
+    Style: Professional travel photography, vibrant colors, natural lighting, Instagram-worthy selfie, square format (1:1 aspect ratio), 4k resolution
     
-    Background: Clearly visible ${landmarkName}, ${landmarkDesc}. The landmark should be recognizable and prominent.
-    
-    Style: Professional travel photography, vibrant colors, influencer selfie style, 4k resolution, natural lighting.
-    
-    ABSOLUTE PRIORITY: The person on the RIGHT must have a face that is pixel-perfect identical to Image #1 (Ailisha). This is the most critical requirement.
+    MOST IMPORTANT: The person's face must be pixel-perfect identical to the reference image.
   `;
 
   try {
-    logger.debug('開始生成景點合照', 'generateSouvenirPhoto', {
-      model,
-      city: cityName,
-      landmark: landmarkName,
-      userImageSize: cleanUser.length,
-      ailishaImageSize: cleanAilisha.length,
-    });
-    
-    // Gemini API 調用：將兩個參考圖片和 prompt 一起傳遞
-    // 圖片順序：Image #1 = Ailisha (右邊的人), Image #2 = User (左邊的人)
+    // Gemini API 調用：只傳遞用戶自拍和 prompt
     const response = await geminiApiClient.generateContent({
       model,
       contents: {
         parts: [
-          // Image #1: Ailisha 參考圖（右邊的人）
-          { 
-            inlineData: { 
-              mimeType: "image/jpeg", 
-              data: cleanAilisha 
-            } 
-          },
-          // Image #2: 用戶自拍（左邊的人）
+          // 用戶自拍參考圖
           { 
             inlineData: { 
               mimeType: "image/jpeg", 
               data: cleanUser 
             } 
           },
-          // Prompt 說明（明確指出 Image #1 = Ailisha, Image #2 = User）
+          // Prompt 說明
           { 
             text: prompt 
           }
