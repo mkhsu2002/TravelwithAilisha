@@ -39,32 +39,32 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-lg mx-auto space-y-10 animate-fade-in">
+    <div className="min-h-screen bg-white flex items-center justify-center py-8 px-4 sm:py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-lg mx-auto space-y-8 sm:space-y-10">
         {/* 標題區域 */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 leading-tight">
-            與 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600">Ailisha</span> 一起環遊世界
+        <div className="text-center space-y-3 sm:space-y-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight">
+            <div className="text-purple-600">與 Ailisha</div>
+            <div className="text-gray-900">一起環遊世界</div>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 leading-relaxed">
-            嗨！我是 <span className="font-bold text-pink-600">Ailisha 艾莉莎</span>
-            <br />
-            上傳一張自拍，我們馬上從 <span className="font-bold text-gray-800 bg-pink-50 px-2 py-1 rounded-md">台北 101</span> 出發！ 🌍 ✨
-          </p>
+          <div className="text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed space-y-1">
+            <p>嗨!我是 Ailisha 艾莉莎。</p>
+            <p>上傳一張自拍,我們馬上從 台北101 出發! 🌍 ✨</p>
+          </div>
         </div>
 
         {/* 表單卡片 */}
-        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10 space-y-6">
+        <div className="bg-white rounded-3xl shadow-lg border border-gray-200 p-6 sm:p-8 md:p-10 space-y-5 sm:space-y-6">
           {/* 暱稱輸入 */}
           <div>
-            <label htmlFor="nickname" className="block text-sm font-bold text-gray-700 mb-3">
+            <label htmlFor="nickname" className="block text-sm font-bold text-gray-700 mb-2 sm:mb-3">
               您的暱稱
             </label>
             <input
               id="nickname"
               type="text"
-              className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-pink-100 focus:border-pink-400 outline-none text-gray-800 font-medium placeholder-gray-400 transition-all hover:border-pink-300"
-              placeholder="例如：冒險家小明"
+              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-gray-50 border border-gray-300 rounded-xl sm:rounded-2xl focus:ring-2 focus:ring-pink-300 focus:border-pink-400 outline-none text-gray-800 text-sm sm:text-base placeholder-gray-400 transition-all"
+              placeholder="例如:冒險家小明"
               value={userData.nickname}
               onChange={(e) => onUserDataChange({ ...userData, nickname: e.target.value })}
               aria-label="輸入您的暱稱"
@@ -73,7 +73,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
           
           {/* 照片上傳 */}
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-3">
+            <label className="block text-sm font-bold text-gray-700 mb-2 sm:mb-3">
               您的自拍照
             </label>
             <PhotoUpload 
@@ -89,8 +89,9 @@ export const StartScreen: React.FC<StartScreenProps> = ({
             onClick={onStart}
             variant="primary"
             aria-label="開始旅程"
+            className="mt-2"
           >
-            出發去旅行！ ✈️
+            出發去旅行! ✈️ ✓
           </Button>
         </div>
       </div>
