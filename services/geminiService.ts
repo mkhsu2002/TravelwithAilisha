@@ -114,7 +114,6 @@ export const generateCityPhoto = async (
       },
       config: {
         imageConfig: {
-            aspectRatio: "9:16",
             imageSize: "1K"
         }
       }
@@ -240,7 +239,6 @@ export const generateSouvenirPhoto = async (
       },
       config: {
         imageConfig: {
-            aspectRatio: "1:1",
             imageSize: "1K"
         }
       }
