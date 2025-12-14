@@ -278,7 +278,11 @@ export const generateDiaryEntry = async (city: string, landmark: string, apiKey:
     
     const response = await geminiApiClient.generateContent({
       model,
-      contents: prompt as unknown as { parts: Array<{ text: string }> },
+      contents: {
+        parts: [
+          { text: prompt.trim() }
+        ]
+      },
     }) as GeminiTextResponse;
     
     // 提取文字內容

@@ -189,21 +189,22 @@ const App: React.FC = () => {
     gameState.setGameState(GameState.PHOTO_GENERATION);
 
     try {
-      // 生成景點合照
-      const landmarkPhotoResult = await photoGeneration.generateLandmarkPhoto(
+      // 生成景點合照和日記
+      const result = await photoGeneration.generateLandmarkPhoto(
         gameState.selectedCity,
         landmark
       );
 
-      // 更新歷史記錄中的 landmark 和合照
+      // 更新歷史記錄中的 landmark、合照和日記
       if (gameState.history.length > 0) {
         const latestHistoryItem = gameState.history[gameState.history.length - 1];
         if (latestHistoryItem && latestHistoryItem.city.name === gameState.selectedCity.name) {
-          // 更新最後一筆記錄的 landmark 和合照
+          // 更新最後一筆記錄
           gameState.updateLastHistoryItem({ 
             landmark,
-            landmarkPhotoUrl: landmarkPhotoResult.photoUrl,
-            landmarkPhotoPrompt: landmarkPhotoResult.prompt
+            landmarkPhotoUrl: result.photoUrl,
+            landmarkPhotoPrompt: result.prompt,
+            diaryEntry: result.diary
           });
         }
       }
