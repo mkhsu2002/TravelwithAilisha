@@ -60,35 +60,35 @@ export const generateCityPhoto = async (
   // 生成 Ailisha 在城市中自在愜意觀光的照片
   // 強調使用參考圖片來確保臉部一致性
   const prompt = `
-    You MUST use the reference image provided to generate Ailisha's face. The reference image shows Ailisha's exact appearance.
+    你必須使用提供的參考圖片來生成 Ailisha 的臉部。參考圖片顯示了 Ailisha 的確切外觀。
     
-    Generate a realistic, high-quality vertical travel photo (9:16 aspect ratio) of Ailisha exploring and enjoying ${cityName}.
+    生成一張真實、高品質的垂直旅行照片（9:16 比例），照片中 Ailisha 正在探索並享受 ${cityName}。
     
-    CRITICAL REQUIREMENTS - USE THE REFERENCE IMAGE FOR AILISHA'S FACE:
-    - The reference image (first image) shows Ailisha's EXACT face, features, and appearance.
-    - You MUST replicate the person in the reference image EXACTLY:
-      * IDENTICAL face shape and structure
-      * IDENTICAL eyes (shape, color, expression)
-      * IDENTICAL nose
-      * IDENTICAL mouth and smile
-      * IDENTICAL hair (style, color, length)
-      * IDENTICAL skin tone
-      * IDENTICAL overall facial appearance and features
-    - DO NOT create a generic or different face. The face MUST be an EXACT COPY of the reference image.
-    - Outfit: ${outfitDesc} (clothing can change, but face must remain IDENTICAL to reference)
-    - Pose: Ailisha is exploring the city naturally, looking relaxed and happy. She might be:
-      * Walking through a street market
-      * Standing at a viewpoint overlooking the city
-      * Sitting at a cafe
-      * Taking photos with her phone
-      * Looking at interesting architecture or scenery
-    - Expression: Natural, happy, relaxed, enjoying the moment
+    關鍵要求 - 使用參考圖片生成 AILISHA 的臉部：
+    - 參考圖片（第一張圖片）顯示了 Ailisha 的確切臉部、特徵和外觀。
+    - 你必須完全複製參考圖片中的人物：
+      * 完全相同的臉型輪廓和結構
+      * 完全相同的眼睛（形狀、顏色、表情）
+      * 完全相同的鼻子
+      * 完全相同的嘴巴和笑容
+      * 完全相同的髮型（樣式、顏色、長度）
+      * 完全相同的膚色
+      * 完全相同的整體面部外觀和特徵
+    - 不要創建通用或不同的臉部。臉部必須是參考圖片的完全複製品。
+    - 服裝：${outfitDesc}（服裝可以改變，但臉部必須與參考圖片完全相同）
+    - 姿勢：Ailisha 自然地探索城市，看起來輕鬆愉快。她可能：
+      * 在街頭市場中行走
+      * 站在俯瞰城市的觀景點
+      * 坐在咖啡館
+      * 用手機拍照
+      * 觀看有趣的建築或風景
+    - 表情：自然、快樂、放鬆，享受當下
     
-    Background: Clearly show ${cityName} - ${cityDescription}. The city should be recognizable with its characteristic features, architecture, and atmosphere. Include elements that represent the city's vibe: ${vibe}.
+    背景：清楚地顯示 ${cityName} - ${cityDescription}。城市應該具有可識別的特徵、建築和氛圍。包含代表城市氛圍的元素：${vibe}。
     
-    Style: Professional travel photography, vibrant colors, natural lighting, Instagram-worthy composition, 4k resolution, vertical format (9:16 aspect ratio).
+    風格：專業旅行攝影，鮮豔色彩，自然光線，Instagram 風格構圖，4K 解析度，垂直格式（9:16 比例）。
     
-    MOST IMPORTANT: Ailisha's face must be pixel-perfect identical to the reference image. Copy the face from the reference image exactly. This is the absolute top priority.
+    最重要：Ailisha 的臉部必須與參考圖片完全一致。完全複製參考圖片中的臉部。這是絕對的首要任務。
   `;
 
   try {
