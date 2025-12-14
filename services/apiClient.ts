@@ -158,15 +158,54 @@ export class GeminiApiClient {
       withRetry(
         async () => {
           try {
-            // 類型斷言：GoogleGenAI 的類型定義可能不完整
-            // 使用 unknown 進行安全轉換
-            const response = await client.models.generateContent({
+            // 根據模型類型使用正確的 API 格式
+            const isImageModel = params.model.includes('image');
+            
+            // 構建 API 參數
+            const apiParams: any = {
               model: params.model,
-              contents: params.contents as unknown as {
-                parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }>;
-              },
-              config: params.config,
+            };
+            
+            if (isImageModel) {
+              // 圖片生成模型 (gemini-2.5-flash-image)
+              // contents 格式：數組，每個元素包含 parts
+              const contentsObj = params.contents as { parts?: Array<any> };
+              if (contentsObj && contentsObj.parts) {
+                apiParams.contents = [{ parts: contentsObj.parts }];
+              } else {
+                apiParams.contents = [params.contents];
+              }
+              
+              // generationConfig 用於圖片生成配置
+              apiParams.generationConfig = {
+                responseModalities: ['IMAGE'],
+              };
+              
+              // 添加圖片配置（如果提供）
+              if (params.config?.imageConfig) {
+                if (params.config.imageConfig.aspectRatio) {
+                  apiParams.generationConfig.aspectRatio = params.config.imageConfig.aspectRatio;
+                }
+                if (params.config.imageConfig.imageSize) {
+                  apiParams.generationConfig.imageSize = params.config.imageConfig.imageSize;
+                }
+              }
+            } else {
+              // 文字生成模型 (gemini-2.5-flash)
+              apiParams.contents = params.contents;
+              if (params.config) {
+                apiParams.generationConfig = params.config;
+              }
+            }
+            
+            logger.debug('API 調用參數', 'generateContent', {
+              model: apiParams.model,
+              hasContents: !!apiParams.contents,
+              contentsLength: Array.isArray(apiParams.contents) ? apiParams.contents.length : 0,
+              generationConfig: apiParams.generationConfig,
             });
+            
+            const response = await client.models.generateContent(apiParams);
             return response;
           } catch (error: unknown) {
             // 處理 API 錯誤
