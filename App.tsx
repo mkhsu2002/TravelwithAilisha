@@ -365,7 +365,7 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50 font-sans">
+      <div className="min-h-screen font-sans" style={{ backgroundColor: '#f9fafb', minHeight: '100vh' }}>
         <BackgroundMusic gameState={gameState.gameState} />
         <ToastContainer toasts={toasts} onRemove={removeToast} />
         

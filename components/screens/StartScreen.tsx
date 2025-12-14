@@ -47,8 +47,8 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col items-center justify-center py-8 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="w-full max-w-lg mx-auto space-y-8 animate-fade-in">
+    <div className="w-full min-h-screen flex flex-col items-center justify-center py-8 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: '#f9fafb' }}>
+      <div className="w-full max-w-lg mx-auto space-y-8">
         {/* 標題區域 */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight">

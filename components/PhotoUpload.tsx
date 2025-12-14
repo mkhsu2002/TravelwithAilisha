@@ -26,22 +26,37 @@ export const PhotoUpload: React.FC<PhotoUploadProps> = ({ onImageSelected, onFil
   };
 
   return (
-    <div className="w-full group">
+    <div className="w-full group" style={{ width: '100%' }}>
       <label
         htmlFor="photo-upload"
         className={`flex flex-col items-center justify-center w-full border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-200 ${
           previewImage 
-            ? 'border-pink-300 bg-pink-50 p-6' 
+            ? 'border-pink-300 bg-pink-50 p-6 min-h-[200px]' 
             : 'border-gray-300 bg-gray-50 h-52 group-hover:bg-pink-50 group-hover:border-pink-300'
         }`}
+        style={{ 
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
       >
         {previewImage ? (
           <div className="flex flex-col items-center space-y-4 w-full">
-            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-pink-300 shadow-lg ring-4 ring-pink-100">
+            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-pink-300 shadow-lg" style={{ 
+              width: '128px', 
+              height: '128px',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '4px solid #f9a8d4',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+            }}>
               <img 
                 src={previewImage} 
                 className="w-full h-full object-cover" 
-                alt="預覽" 
+                alt="預覽"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
             <div className="text-center">
