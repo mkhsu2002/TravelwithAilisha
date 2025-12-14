@@ -45,7 +45,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
         <div className="text-center space-y-3 sm:space-y-4">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight">
             <div className="text-purple-600">與 Ailisha</div>
-            <div className="text-gray-900">一起環遊世界 v1.0</div>
+            <div className="text-gray-900">一起環遊世界</div>
           </h1>
           <div className="text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed space-y-1">
             <p>嗨!我是 Ailisha 艾莉莎。</p>

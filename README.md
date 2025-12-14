@@ -6,7 +6,7 @@
 
 **點擊圖片前往 [Ailisha 的 Facebook](https://www.facebook.com/ailisha0501/)**
 
-# 與 Ailisha 艾莉莎環遊世界 v1.0
+# 與 Ailisha 艾莉莎環遊世界
 
 一個互動式的世界旅行遊戲，與 AI 導遊 Ailisha 一起環遊世界，創造回憶和照片。
 
