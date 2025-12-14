@@ -36,7 +36,7 @@ export const generateCityPhoto = async (
 ): Promise<{ photoUrl: string; prompt: string }> => {
   // 確保 AI 客戶端已初始化
   geminiApiClient.initialize(apiKey);
-  const model = "gemini-3-pro-image-preview";
+  const model = "gemini-2.5-flash";
 
   // 載入 Ailisha 參考圖片
   const ailishaImageBase64 = await loadAilishaImage();
@@ -152,7 +152,7 @@ export const generateSouvenirPhoto = async (
   apiKey: string
 ): Promise<{ photoUrl: string; prompt: string }> => {
   geminiApiClient.initialize(apiKey);
-  const model = "gemini-3-pro-image-preview";
+  const model = "gemini-2.5-flash";
 
   // Clean base64 strings
   const cleanUser = userSelfieBase64.includes(',') 

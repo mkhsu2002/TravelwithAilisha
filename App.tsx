@@ -15,7 +15,7 @@ import { CitySelectionScreen } from './components/screens/CitySelectionScreen';
 import { LandmarkSelectionScreen } from './components/screens/LandmarkSelectionScreen';
 import { SummaryScreen } from './components/screens/SummaryScreen';
 import { PhotoResultScreen } from './components/screens/PhotoResultScreen';
-import { saveHistory, saveGameProgress, loadUserData, loadHistory, loadGameProgress } from './utils/storage';
+import { saveHistory, saveGameProgress, loadUserData, loadHistory, loadGameProgress, clearAllData, saveUserData } from './utils/storage';
 import { GAME_CONFIG } from './utils/constants';
 import { resetStartDate } from './utils/dateUtils';
 import { ErrorHandler } from './utils/errorHandler';
@@ -129,12 +129,30 @@ const App: React.FC = () => {
       return;
     }
     
+    // 開始新遊戲時，重置所有遊戲進度，確保從第一站開始
+    gameState.setCurrentRound(1);
+    gameState.setCurrentLocation(STARTING_CITY);
+    gameState.setCurrentLat(25.0);
+    gameState.setHistory([]);
+    
+    // 清除儲存的遊戲進度和歷史記錄，但保留用戶資料（暱稱和自拍照）
+    try {
+      // 只清除遊戲進度相關的儲存，不清除用戶資料
+      localStorage.removeItem('travel_ailisha_history');
+      localStorage.removeItem('travel_ailisha_current_round');
+      localStorage.removeItem('travel_ailisha_current_lat');
+      localStorage.removeItem('travel_ailisha_current_location');
+      // 用戶資料會自動保存（在 useEffect 中）
+    } catch (error) {
+      console.error('清除遊戲進度失敗:', error);
+    }
+    
     gameState.setGameState(GameState.INTRO);
     
     setTimeout(() => {
       loadCityOptionsForRound(1);
     }, GAME_CONFIG.INTRO_DELAY);
-  }, [gameState.userData, gameState.setGameState, showError]);
+  }, [gameState.userData, gameState.setGameState, gameState.setCurrentRound, gameState.setCurrentLocation, gameState.setCurrentLat, gameState.setHistory, showError]);
 
   const loadCityOptionsForRound = useCallback((round: number) => {
     gameState.setLoading(true, `${AILISHA_NAME} 正在研究 ${round === 1 ? '世界地圖' : '下一站路線'}...`);
