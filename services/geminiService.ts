@@ -218,28 +218,8 @@ export const generateSouvenirPhoto = async (
       }
     }) as GeminiImageResponse;
 
-    // Check for image in response
-    const candidates = response.candidates || [];
-    if (candidates.length === 0) {
-      throw new ApiError('API 沒有返回任何結果', 'NO_CANDIDATES');
-    }
-
-    const candidate = candidates[0];
-    if (!candidate) {
-      throw new ApiError('API 響應格式錯誤', 'INVALID_RESPONSE');
-    }
-
-    const parts = candidate.content?.parts || [];
-    
-    // 檢查是否有錯誤
-    if (candidate.finishReason && candidate.finishReason !== 'STOP') {
-      throw new ApiError(
-        `圖片生成被中斷: ${candidate.finishReason}`,
-        'GENERATION_INTERRUPTED'
-      );
-    }
-
-    // 查找圖片數據
+    // Check for image in response - 使用與 generateCityPhoto 相同的解析邏輯
+    const parts = response.candidates?.[0]?.content?.parts || [];
     for (const part of parts) {
       if (part.inlineData && part.inlineData.data) {
         logger.info('景點合照生成成功', 'generateSouvenirPhoto', {
@@ -252,9 +232,7 @@ export const generateSouvenirPhoto = async (
         };
       }
     }
-    
-    // 如果沒有找到圖片
-    throw new ApiError('API 響應中沒有找到圖片數據', 'NO_IMAGE_DATA');
+    throw new ApiError("API 沒有返回圖片", "NO_IMAGE_GENERATED");
   } catch (error) {
     ErrorHandler.handle(error, 'generateSouvenirPhoto');
     throw error;
